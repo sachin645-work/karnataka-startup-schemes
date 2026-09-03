@@ -33,19 +33,6 @@ export type Scheme = {
   deadlineNote?: string;
   documentsRequired?: string[];
   downloads?: string[];
-  /**
-   * If set, this scheme's eligibility depends on a sensitive attribute
-   * (gender, social category, and so on) that the chatbot must never
-   * infer, for example from a name. It may only recommend this scheme if
-   * the conversation contains an explicit confirming answer, checked with
-   * requiresKeyword / confirmKeywords below.
-   */
-  sensitiveGate?: {
-    /** A word/phrase that must appear in an assistant question for the gate to count as asked. */
-    askedKeyword: string;
-    /** Words that count as an affirmative reply to that question. */
-    confirmKeywords: string[];
-  };
   contact?: string;
   unverifiedNote?: string;
 };
@@ -183,10 +170,6 @@ export const SCHEMES: Scheme[] = [
       "Sector is Biotech, AgriTech, MedTech/Healthtech, or Cleantech",
       "Early-stage (for the incubation track) or growth/scale-up stage (for the acceleration track)",
     ],
-    sensitiveGate: {
-      askedKeyword: "women",
-      confirmKeywords: ["yes", "yeah", "yep", "correct", "i am", "we are", "woman-led", "women-led"],
-    },
     programStructure: [
       "30 startups supported per year across 2 sector-specific cohorts of 15 each",
       "Incubation track: 6 months, up to ₹20 lakh grant-in-aid per cohort",
@@ -367,40 +350,6 @@ export function getSchemeById(id: string): Scheme | undefined {
 
 export function getSchemesByCategory(category: SchemeCategory): Scheme[] {
   return SCHEMES.filter((s) => s.category === category);
-}
-
-/**
- * The chatbot's content engine: serialises every field of every scheme
- * into one grounding block for the assistant's system prompt. This is the
- * only source of scheme facts the model is allowed to draw on, so it
- * includes everything, not just a summary, eligibility, structure,
- * evaluation weightage, benefits, deadlines, documents, contact details.
- */
-/**
- * Compact grounding text for the chatbot's system prompt: only what's
- * needed to route eligibility and hold a conversation, not the full
- * detail-page content. The full Scheme objects (with objectives,
- * evaluation weightage, documents, contact, and so on) still power the
- * website's own /schemes pages, this function just doesn't repeat all of
- * that on every chat turn.
- *
- * This exists because the full version blew through the Groq API key's
- * per-minute token budget within one or two turns (the account's
- * x-ratelimit-limit-tokens header showed an 8000 token/minute cap, and a
- * single full-detail prompt was consuming nearly all of it), causing
- * repeated json_validate_failed errors regardless of which model was
- * used. Keeping this lean is a reliability requirement, not just a nice-
- * to-have.
- */
-export function buildSchemeGroundingText(): string {
-  return SCHEMES.map((s) => {
-    const parts = [`${s.id} | ${s.name} | ${CATEGORY_LABELS[s.category]} | ${s.tagline}`];
-    if (s.eligibility) {
-      parts.push(`${s.eligibilityLabel ?? "Eligibility"}: ${s.eligibility.join("; ")}`);
-    }
-    if (s.deadlineNote) parts.push(`Note: ${s.deadlineNote}`);
-    return parts.join("\n");
-  }).join("\n\n");
 }
 
 export const CATEGORY_LABELS: Record<SchemeCategory, string> = {

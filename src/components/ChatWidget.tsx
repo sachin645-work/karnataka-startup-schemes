@@ -2,11 +2,11 @@
 
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { getSchemeById } from "@/lib/schemes";
+import { getNextQuestion, computeRecommendations, type ChatState, type Question, type Recommendation } from "@/lib/chatFlow";
 import { track } from "@/lib/mixpanel";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 type InputType = "text" | "yesno" | "options" | "done";
-type Recommendation = { schemeId: string; why: string };
 
 export type ChatWidgetHandle = { open: () => void };
 
@@ -17,6 +17,9 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
   const [isOpen, setIsOpen] = useState(false);
   const [started, setStarted] = useState(false);
   const startedRef = useRef(false);
+  const [name, setName] = useState("");
+  const [answers, setAnswers] = useState<ChatState>({});
+  const [currentQuestionId, setCurrentQuestionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputType, setInputType] = useState<InputType>("text");
   const [options, setOptions] = useState<string[] | null>(null);
@@ -29,7 +32,6 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
     if (!startedRef.current) {
       startedRef.current = true;
       track("chatbot_opened");
-      setStarted(true);
       setMessages([{ role: "assistant", content: OPENING_MESSAGE }]);
       setInputType("text");
     }
@@ -45,46 +47,82 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
     }
   }
 
-  async function send(userText: string) {
-    const trimmed = userText.trim();
-    if (!trimmed || loading) return;
+  function askQuestion(question: Question) {
+    setCurrentQuestionId(question.id);
+    setMessages((m) => [...m, { role: "assistant", content: question.prompt }]);
+    setInputType(question.inputType);
+    setOptions(question.options ?? null);
+  }
 
-    const next = [...messages, { role: "user" as const, content: trimmed }];
-    setMessages(next);
-    setTextValue("");
+  async function finish(finalAnswers: ChatState, finalName: string) {
+    const recs = computeRecommendations(finalAnswers);
+    track("recommendations_shown", { count: recs.length });
+    setRecommendations(recs);
+    setInputType("done");
+
+    const fallback =
+      recs.length > 0
+        ? `Nice work, ${finalName}, here's what's worth applying for.`
+        : `Thanks for walking through this, ${finalName}. Nothing here looks like a fit right now, but that can change fast as things move.`;
+    setMessages((m) => [...m, { role: "assistant", content: fallback }]);
+
+    // Best-effort only: swaps in a warmer closing line if Groq responds
+    // quickly, otherwise the fallback above already said everything that
+    // matters. Never blocks or shows an error either way.
     setLoading(true);
-    setOptions(null);
-    track("message_sent", { input_type: inputType });
-
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next }),
+        body: JSON.stringify({
+          name: finalName,
+          schemeNames: recs.map((r) => getSchemeById(r.schemeId)?.name).filter(Boolean),
+        }),
+        signal: AbortSignal.timeout(7000),
       });
       const data = await res.json();
-
-      setMessages((m) => [...m, { role: "assistant", content: data.message }]);
-      setInputType(data.inputType ?? "text");
-      setOptions(data.options ?? null);
-
-      if (data.inputType === "done") {
-        setRecommendations(data.recommendations ?? []);
-        track("recommendations_shown", { count: (data.recommendations ?? []).length });
+      if (data.message) {
+        setMessages((m) => [...m.slice(0, -1), { role: "assistant", content: data.message }]);
       }
     } catch {
-      setMessages((m) => [
-        ...m,
-        { role: "assistant", content: "Something went wrong, could you try that again?" },
-      ]);
+      // keep the fallback message
     } finally {
       setLoading(false);
     }
   }
 
+  function handleAnswer(rawValue: string) {
+    const trimmed = rawValue.trim();
+    if (!trimmed || loading) return;
+
+    setMessages((m) => [...m, { role: "user", content: trimmed }]);
+    setTextValue("");
+    setOptions(null);
+
+    if (!started) {
+      setStarted(true);
+      setName(trimmed);
+      track("message_sent", { question: "name" });
+      const first = getNextQuestion({});
+      if (first) askQuestion(first);
+      return;
+    }
+
+    track("message_sent", { question: currentQuestionId });
+    const nextAnswers = currentQuestionId ? { ...answers, [currentQuestionId]: trimmed } : answers;
+    setAnswers(nextAnswers);
+
+    const next = getNextQuestion(nextAnswers);
+    if (next) {
+      askQuestion(next);
+    } else {
+      finish(nextAnswers, name);
+    }
+  }
+
   function handleTextSubmit(e: React.FormEvent) {
     e.preventDefault();
-    send(textValue);
+    handleAnswer(textValue);
   }
 
   return (
@@ -176,14 +214,14 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
               <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => send("Yes")}
+                  onClick={() => handleAnswer("Yes")}
                   className="flex-1 rounded border border-govgray-300 py-2 text-sm text-govgray-700 hover:bg-govgray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-900"
                 >
                   Yes
                 </button>
                 <button
                   type="button"
-                  onClick={() => send("No")}
+                  onClick={() => handleAnswer("No")}
                   className="flex-1 rounded border border-govgray-300 py-2 text-sm text-govgray-700 hover:bg-govgray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-900"
                 >
                   No
@@ -197,7 +235,7 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
                   <button
                     key={o}
                     type="button"
-                    onClick={() => send(o)}
+                    onClick={() => handleAnswer(o)}
                     className="rounded border border-govgray-300 px-3 py-2 text-left text-sm text-govgray-700 hover:bg-govgray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-900"
                   >
                     {o}
@@ -220,13 +258,13 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
                   spellCheck={false}
                   value={textValue}
                   onChange={(e) => setTextValue(e.target.value)}
-                  disabled={loading}
+                  disabled={loading || inputType === "done"}
                   placeholder={started ? "Type your answer..." : "Say hello to get started..."}
-                  className="flex-1 rounded border border-govgray-300 bg-white px-3 py-2 text-sm text-govgray-700 placeholder:text-govgray-700/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-900"
+                  className="flex-1 rounded border border-govgray-300 bg-white px-3 py-2 text-sm text-govgray-700 placeholder:text-govgray-700/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-900 disabled:opacity-50"
                 />
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || inputType === "done"}
                   className="rounded bg-govorange-500 px-3 py-2 text-sm font-medium text-white hover:bg-govorange-600 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-900"
                 >
                   Send
