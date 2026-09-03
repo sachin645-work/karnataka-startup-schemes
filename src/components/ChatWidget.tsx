@@ -11,7 +11,7 @@ type Recommendation = { schemeId: string; why: string };
 export type ChatWidgetHandle = { open: () => void };
 
 const OPENING_MESSAGE =
-  "Hi! I can help you find which Karnataka startup schemes you might be eligible for. What's your name, and what are you working on?";
+  "Hi! I can help you find Karnataka startup schemes you might be eligible for. What's your name?";
 
 export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_props, ref) {
   const [isOpen, setIsOpen] = useState(false);

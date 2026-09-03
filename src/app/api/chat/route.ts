@@ -47,10 +47,16 @@ CONTENT LIBRARY (every scheme, full detail):
 ${buildSchemeGroundingText()}
 
 YOUR JOB, in two stages, never named to the user:
-Stage 1, understand the person. Ask a small number of open, relevant questions to understand who they are and what they're building: their name, and enough about their idea or venture (stage, sector, team) to know which direction to go. Keep this brief, two or three questions at most, and let their own words guide follow-ups rather than running a fixed checklist.
-Stage 2, understand their eligibility. Once you have a basic picture, move into the specific facts that actually gate the schemes in the library: things like age, state and citizenship, student or employment status, registration and DPIIT status, revenue, team size, sector, gender (only if relevant to a scheme like WEscalate, and always optional), and location relative to Bengaluru Urban District. Only ask what at least one scheme in the library actually needs. Ask one thing at a time, and let their answers rule schemes in or out as you go rather than asking every possible field regardless of relevance.
+Stage 1, learn their name. This is already handled before you're called, do not ask for it again.
+Stage 2, understand their eligibility, efficiently. Ask only the highest-signal questions needed to tell which schemes in the library apply, prioritising the ones that determine stage first (for example: do they have a working prototype, is a company registered yet, is there any revenue). Skip anything only one obscure scheme needs unless their earlier answers make that scheme plausible. Aim to reach a recommendation in as few questions as it honestly takes, typically well under ten, never pad the conversation with questions that will not change the outcome.
 
-Never expose this two-stage structure to the user. No "step X of Y", no naming "Stage 1" or "eligibility phase", no checklist language. It must read as one natural, continuous conversation with someone who is genuinely trying to help, not a form.
+Never expose this structure to the user. No "step X of Y", no naming "Stage 1" or "eligibility phase", no checklist language. It must read as one natural, continuous conversation with someone who is genuinely trying to help, not a form.
+
+QUESTION RULES, these matter a lot:
+One question, one outcome. Never combine two questions into one message (never ask "what's your name and what are you building" as a single question, for example). Every message asks exactly one thing.
+Avoid free-text descriptive questions wherever a fixed set of answers exists. Do not ask "tell me about your idea" or "what stage is your startup at" as open text. Instead offer concrete options, for example an "options" question with choices like "Just an idea, nothing built yet", "Working prototype, not launched", "Launched, no revenue yet", "Launched with revenue". The user should be able to answer almost every question with a single tap, not a sentence they have to compose.
+Reserve "text" input only for things with no sensible fixed answer set (their name, or a specific number like their age). Everything else should be "yesno" or "options".
+Keep each question's wording simple, concrete, and in plain words, no jargon, no compound clauses.
 
 OUTPUT FORMAT, always respond with a single JSON object, no other text, matching exactly this shape:
 {
@@ -61,9 +67,9 @@ OUTPUT FORMAT, always respond with a single JSON object, no other text, matching
 }
 
 Rules for inputType:
-"text": the question is open-ended or descriptive, for example asking their name, or asking them to describe their idea in their own words. The user will type a free response.
+"text": only for things with no fixed answer set, like a name or an age. The user will type a free response.
 "yesno": the question has a natural yes or no answer, for example "Are you currently generating any revenue?" Do not put yes or no inside options, just set inputType to "yesno" and options to null.
-"options": the question has a natural fixed set of answers, for example which sector best describes their venture, or their student status. Populate "options" with 2 to 5 short choices.
+"options": the question has a natural fixed set of answers, for example which stage best describes their venture, or their student status. Populate "options" with 2 to 5 short choices. Prefer this over "text" whenever a fixed set of answers is possible.
 "done": you have enough to give a recommendation. Set "message" to a short closing line, and "recommendations" to the schemes you judge as likely eligible, each with a one sentence "why" written in plain language, referencing the specific facts that make it a fit. Only use schemeId values from the content library above, never invent one. If nothing genuinely looks eligible yet, return an empty recommendations array and say so kindly, mentioning what would need to change.
 
 Guardrails, never break these:
@@ -98,18 +104,31 @@ export async function POST(request: Request) {
 
   try {
     const completion = await groq.chat.completions.create({
+      // Tried gpt-oss-20b for speed, but it intermittently failed Groq's own
+      // JSON-mode validation outright (json_validate_failed, empty
+      // failed_generation) once the full scheme content library is in the
+      // prompt. An outright error is worse than latency, so staying on
+      // 120b, which was reliable across every test in this build. Latency
+      // is still addressed via shorter expected answers and a lower
+      // max_tokens below, since output length is the main per-turn cost.
       model: "openai/gpt-oss-120b",
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         ...messages.map((m) => ({ role: m.role, content: m.content })),
       ],
-      temperature: 0.4,
-      max_tokens: 700,
+      temperature: 0.3,
+      max_tokens: 450,
       response_format: { type: "json_object" },
     });
 
     const raw = completion.choices[0]?.message?.content ?? "{}";
-    const parsed = JSON.parse(raw) as Partial<AssistantTurn>;
+    let parsed: Partial<AssistantTurn>;
+    try {
+      parsed = JSON.parse(raw) as Partial<AssistantTurn>;
+    } catch (parseErr) {
+      console.error("[chat] JSON parse failed. Raw model output:", raw);
+      throw parseErr;
+    }
 
     const inputType: AssistantTurn["inputType"] =
       parsed.inputType === "yesno" || parsed.inputType === "options" || parsed.inputType === "done"
@@ -134,7 +153,8 @@ export async function POST(request: Request) {
     };
 
     return NextResponse.json(turn);
-  } catch {
+  } catch (err) {
+    console.error("[chat] request failed:", err);
     return NextResponse.json(
       {
         message: "Something went wrong on my end, could you try that again?",
