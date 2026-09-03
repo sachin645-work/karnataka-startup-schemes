@@ -23,10 +23,10 @@ export default function SchemesHubPage() {
 
   return (
     <main className="min-h-screen bg-white">
-      <div className="bg-govblue-900 text-white">
+      <div className="bg-white border-b border-govgray-300">
         <div className="mx-auto max-w-6xl px-4 py-12 text-center">
-          <h1 className="text-3xl font-bold">Explore Schemes</h1>
-          <p className="mt-2 text-white/90">
+          <h1 className="text-3xl font-bold text-govblue-900">Explore Schemes</h1>
+          <p className="mt-2 text-govgray-700">
             Browse every scheme and initiative under Startup Karnataka, grouped by category.
           </p>
         </div>

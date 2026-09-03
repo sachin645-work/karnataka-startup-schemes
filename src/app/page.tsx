@@ -42,7 +42,7 @@ export default function Home() {
       </section>
 
       {/* Policy pillars */}
-      <section className="bg-govgray-50">
+      <section className="bg-white">
         <div className="mx-auto max-w-6xl px-4 py-14">
           <h2 className="text-2xl font-bold text-govblue-900 text-center mb-2">
             Karnataka Startup Policy 2025-30 — Pillars
@@ -66,10 +66,10 @@ export default function Home() {
       </section>
 
       {/* Initiatives preview strip — poster-style cards, static per scope */}
-      <section className="bg-govorange-500 text-white">
+      <section className="bg-white border-t border-govgray-300">
         <div className="mx-auto max-w-6xl px-4 py-14">
-          <h2 className="text-2xl font-bold text-center">Initiatives under Startup Karnataka</h2>
-          <p className="text-center text-white/85 mt-2 mb-10">
+          <h2 className="text-2xl font-bold text-center text-govblue-900">Initiatives under Startup Karnataka</h2>
+          <p className="text-center text-govgray-700/70 mt-2 mb-10">
             A preview of what&apos;s available — see the full list on the Schemes page.
           </p>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -86,7 +86,7 @@ export default function Home() {
             ))}
           </div>
           <div className="text-center mt-10">
-            <Link href="/schemes" className="inline-block rounded bg-govblue-900 hover:opacity-90 px-6 py-3 font-semibold transition-opacity">
+            <Link href="/schemes" className="inline-block rounded bg-govorange-500 hover:bg-govorange-600 text-white px-6 py-3 font-semibold transition-colors">
               View all schemes →
             </Link>
           </div>

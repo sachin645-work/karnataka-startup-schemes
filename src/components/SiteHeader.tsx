@@ -13,28 +13,30 @@ export function SiteHeader() {
 
   return (
     <header>
-      {/* Utility bar */}
+      {/* Utility bar — layout matched, left zone left blank (no logo/login to place there) */}
       <div className="bg-[#1a1a1a] text-white text-xs">
-        <div className="mx-auto max-w-6xl px-4 py-1.5 flex items-center justify-between">
-          <span className="opacity-70">Preview build · not the official portal</span>
+        <div className="mx-auto max-w-6xl px-4 py-1.5 flex items-center justify-end">
           <div className="flex items-center gap-3 opacity-80">
             <span>EN | ಕನ್ನಡ</span>
             <button type="button" className="hover:underline">A-</button>
             <button type="button" className="hover:underline">A+</button>
+            <button type="button" aria-label="Toggle contrast" className="hover:underline">◐</button>
           </div>
         </div>
       </div>
 
-      {/* Masthead — original identity, no government emblem/wordmark */}
+      {/* Masthead — text-based wordmark in place of the logo mark */}
       <div className="border-b border-govgray-300 bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-4 flex items-center gap-3">
-          <div className="h-11 w-11 rounded-full bg-govblue-900 text-white flex items-center justify-center font-bold text-lg">
-            K
-          </div>
+        <div className="mx-auto max-w-6xl px-4 py-4 flex items-center gap-2">
+          <span className="text-govorange-500 text-2xl font-black leading-none" aria-hidden="true">
+            ➤
+          </span>
           <div>
-            <p className="font-extrabold text-govblue-900 leading-tight">Karnataka Startup Schemes</p>
+            <p className="font-extrabold text-govblue-900 text-lg leading-tight tracking-tight">
+              KARNATAKA STARTUP SCHEMES
+            </p>
             <p className="text-xs text-govgray-700/70 leading-tight">
-              Independent, unofficial guide — not a government service
+              Startup Ecosystem Portal
             </p>
           </div>
         </div>

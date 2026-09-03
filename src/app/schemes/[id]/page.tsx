@@ -13,22 +13,22 @@ export default async function SchemeDetailPage({ params }: { params: Promise<{ i
 
   return (
     <main className="min-h-screen bg-white">
-      <div className="bg-govblue-900 text-white">
+      <div className="bg-white border-b border-govgray-300">
         <div className="mx-auto max-w-4xl px-4 py-10">
-          <Link href="/schemes" className="text-sm text-white/80 hover:underline">
+          <Link href="/schemes" className="text-sm text-govblue-700 hover:underline">
             ← Back to all schemes
           </Link>
-          <span className="mt-4 inline-block rounded-full bg-govorange-500 px-3 py-1 text-xs font-semibold">
+          <span className="mt-4 inline-block rounded-full bg-govorange-500 text-white px-3 py-1 text-xs font-semibold">
             {CATEGORY_LABELS[scheme.category]}
           </span>
-          <h1 className="mt-3 text-2xl md:text-3xl font-bold">{scheme.name}</h1>
-          <p className="mt-2 text-white/90">{scheme.tagline}</p>
+          <h1 className="mt-3 text-2xl md:text-3xl font-bold text-govblue-900">{scheme.name}</h1>
+          <p className="mt-2 text-govgray-700">{scheme.tagline}</p>
           <div className="mt-6 flex gap-3 flex-wrap">
             <a
               href={scheme.officialUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded bg-govorange-500 hover:bg-govorange-600 px-5 py-2.5 font-semibold transition-colors"
+              className="rounded bg-govorange-500 hover:bg-govorange-600 text-white px-5 py-2.5 font-semibold transition-colors"
             >
               {scheme.isExternal ? "Visit Official Site" : "Visit Official Portal"} →
             </a>
