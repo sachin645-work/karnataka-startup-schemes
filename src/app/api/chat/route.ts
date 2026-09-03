@@ -55,16 +55,20 @@ Never expose this structure to the user. No "step X of Y", no naming "Stage 1" o
 QUESTION RULES, these matter a lot:
 One question, one outcome. Never combine two questions into one message (never ask "what's your name and what are you building" as a single question, for example). Every message asks exactly one thing.
 Avoid free-text descriptive questions wherever a fixed set of answers exists. Do not ask "tell me about your idea" or "what stage is your startup at" as open text. Instead offer concrete options, for example an "options" question with choices like "Just an idea, nothing built yet", "Working prototype, not launched", "Launched, no revenue yet", "Launched with revenue". The user should be able to answer almost every question with a single tap, not a sentence they have to compose.
-Reserve "text" input only for things with no sensible fixed answer set (their name, or a specific number like their age). Everything else should be "yesno" or "options".
+Reserve "text" input only for things with no sensible fixed answer set (their name, a specific number like their age, or a place name like their city or district). Everything else should be "yesno" or "options".
+Before using "options", check that the choices genuinely cover every realistic answer, not just the cases one scheme happens to name. A real failure mode: a scheme's eligibility text names a handful of specific district clusters (for example "Mysuru-Chamarajanagar" or "Tumkur"), and turning that directly into an options question strands anyone in Bengaluru or any other district with no way to answer. If the real-world answer space is open-ended (a city, a district, a sector, a job title), ask it as "text" instead of forcing it into a short options list, or if options genuinely fit better, always include a catch-all choice such as "Somewhere else" so nobody is stuck. For location specifically, the only distinction that actually matters for eligibility is Bengaluru Urban versus everywhere else in Karnataka, so ask it that simply (a "yesno" or two-choice "options" question) rather than naming specific districts or cluster groupings.
+Before finalising any question, picture an ordinary person reading it cold: would they immediately recognise which choice describes them, or would they hesitate because their actual situation is not listed? If any realistic answer would leave them stuck, change the question rather than asking it as designed.
 Keep each question's wording simple, concrete, and in plain words, no jargon, no compound clauses.
 
-OUTPUT FORMAT, always respond with a single JSON object, no other text, matching exactly this shape:
+OUTPUT FORMAT, always respond with exactly one single JSON object, no other text, matching exactly this shape:
 {
   "message": "<what you say this turn, in plain conversational language>",
   "inputType": "text" | "yesno" | "options" | "done",
   "options": string[] or null,
   "recommendations": [{"schemeId": string, "why": string}] or null
 }
+
+Critical: output ONE JSON object only, for THIS turn only. Never simulate or write out the user's next answer, never chain several turns together, never output multiple JSON objects back to back. You do not know what the user will say next, stop after your one question and wait for their real reply.
 
 Rules for inputType:
 "text": only for things with no fixed answer set, like a name or an age. The user will type a free response.
@@ -101,8 +105,13 @@ async function attemptTurn(groq: Groq, messages: ChatMessage[]): Promise<Assista
       { role: "system", content: SYSTEM_PROMPT },
       ...recentMessages.map((m) => ({ role: m.role, content: m.content })),
     ],
-    temperature: 0.3,
-    max_tokens: 450,
+    temperature: 0.2,
+    // 450 was too tight, at least one real response got cut off mid-JSON
+    // (Groq's own "max completion tokens reached before generating a
+    // valid document" error). 650 gives enough headroom for a "done" turn
+    // with two or three recommendations, still far below the per-minute
+    // token budget being the bottleneck.
+    max_tokens: 650,
     response_format: { type: "json_object" },
   });
 
@@ -164,6 +173,23 @@ export async function POST(request: Request) {
       return NextResponse.json(turn);
     } catch (err) {
       console.error(`[chat] attempt ${attempt}/${MAX_ATTEMPTS} failed:`, err);
+
+      // A 429 means the API key's rate limit (per-minute or per-day) is
+      // exhausted. Retrying identically 3 times in a row cannot help,
+      // it just burns whatever quota is left and delays an honest
+      // response, so stop immediately instead of exhausting MAX_ATTEMPTS.
+      if (err instanceof Groq.RateLimitError) {
+        return NextResponse.json(
+          {
+            message:
+              "This chat is getting a lot of use right now and has hit its usage limit, please try again in a few minutes.",
+            inputType: "text",
+            options: null,
+            recommendations: null,
+          } satisfies AssistantTurn,
+          { status: 200 }
+        );
+      }
       // fall through and retry, unless this was the last attempt
     }
   }
