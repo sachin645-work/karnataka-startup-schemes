@@ -3,7 +3,7 @@
  * facts (eligibility rules, funding figures, structure) gathered from the
  * official Startup Karnataka portal (eitbt.karnataka.gov.in/startup) and
  * its sub-portals. It is not a copy of the source site's own text.
- * Verified 2026-09-04 — treat the official site as authoritative; this
+ * Verified 2026-09-04, treat the official site as authoritative; this
  * data goes stale until someone re-checks it by hand.
  */
 
@@ -33,6 +33,19 @@ export type Scheme = {
   deadlineNote?: string;
   documentsRequired?: string[];
   downloads?: string[];
+  /**
+   * If set, this scheme's eligibility depends on a sensitive attribute
+   * (gender, social category, and so on) that the chatbot must never
+   * infer, for example from a name. It may only recommend this scheme if
+   * the conversation contains an explicit confirming answer, checked with
+   * requiresKeyword / confirmKeywords below.
+   */
+  sensitiveGate?: {
+    /** A word/phrase that must appear in an assistant question for the gate to count as asked. */
+    askedKeyword: string;
+    /** Words that count as an affirmative reply to that question. */
+    confirmKeywords: string[];
+  };
   contact?: string;
   unverifiedNote?: string;
 };
@@ -50,7 +63,7 @@ export const SCHEMES: Scheme[] = [
     officialUrl: "https://eitbt.karnataka.gov.in/startup/public/134/local-economy-accelerator-program-leap/en",
     depth: "full",
     overview:
-      "LEAP is a large, multi-year state initiative aimed at spreading Karnataka's startup activity beyond Bengaluru. Rather than a single grant, it funds a wide set of sub-programs — labs, hackathons, research support, and outreach — across six named regional clusters, with the goal of building durable local innovation infrastructure rather than one-off funding.",
+      "LEAP is a large, multi-year state initiative aimed at spreading Karnataka's startup activity beyond Bengaluru. Rather than a single grant, it funds a wide set of sub-programs, labs, hackathons, research support, and outreach, across six named regional clusters, with the goal of building durable local innovation infrastructure rather than one-off funding.",
     objectives: [
       "Build innovation and prototyping infrastructure in colleges outside Bengaluru Urban District",
       "Create jobs and reduce the concentration of startup activity in Bengaluru alone",
@@ -75,7 +88,7 @@ export const SCHEMES: Scheme[] = [
     ],
     downloads: ["List of colleges eligible for the Innovation Labs component"],
     unverifiedNote:
-      "Overall figures (₹1,000 crore over 5 years, ₹200 crore for the current year) come from a cited government order — confirm the current allocation on the official page.",
+      "Overall figures (₹1,000 crore over 5 years, ₹200 crore for the current year) come from a cited government order, confirm the current allocation on the official page.",
   },
   {
     id: "rgep",
@@ -98,13 +111,13 @@ export const SCHEMES: Scheme[] = [
       "Holds no stake in any other startup",
       "Received no more than ₹5 lakh cumulatively from government or private grants so far",
       "Not generating revenue from any product or service",
-      "Idea is between early ideation and early prototype — not yet introduced to the market in any form",
+      "Idea is between early ideation and early prototype, not yet introduced to the market in any form",
       "Able to work on the idea full-time for the full 12-month program",
     ],
     programStructure: ["Supports 30 innovators per cohort", "₹25,000 per month, paid for 12 months"],
     evaluationSteps: [
-      "Data sufficiency check — applications are screened for basic eligibility and required documents, including a pitch deck",
-      "Jury round — shortlisted applicants present in person to a 3-member jury (industry, academia, corporate) for about 20 minutes each",
+      "Data sufficiency check, applications are screened for basic eligibility and required documents, including a pitch deck",
+      "Jury round, shortlisted applicants present in person to a 3-member jury (industry, academia, corporate) for about 20 minutes each",
     ],
     evaluationCriteria: [
       { criterion: "Novelty / innovation", weight: 30 },
@@ -116,9 +129,9 @@ export const SCHEMES: Scheme[] = [
     documentsRequired: ["Pitch deck", "Proof of degree", "Proof of Karnataka domicile and citizenship"],
     downloads: ["Operational guidelines", "Pitch deck template"],
     applicationProcess: "Apply through the official portal's application form ahead of the stated deadline.",
-    deadlineNote: "Site has listed 31 Aug 2026 as a past application round's deadline — check the official page for the current round.",
+    deadlineNote: "Site has listed 31 Aug 2026 as a past application round's deadline, check the official page for the current round.",
     contact:
-      "Karnataka Startup Cell, Karnataka Innovation and Technology Society (KITS), Dept. of Electronics, IT & BT, Government of Karnataka — Bengaluru. Phone: 080-22231007.",
+      "Karnataka Startup Cell, Karnataka Innovation and Technology Society (KITS), Dept. of Electronics, IT & BT, Government of Karnataka, Bengaluru. Phone: 080-22231007.",
   },
   {
     id: "nain-2.0",
@@ -148,7 +161,7 @@ export const SCHEMES: Scheme[] = [
       "Direct funding for student project work, not just theoretical training",
       "Assigned mentors to help formulate a real business model, not just a class project",
       "Institutional incubation infrastructure that outlasts any one cohort of students",
-      "Regional reach — support concentrated outside Bengaluru specifically",
+      "Regional reach, support concentrated outside Bengaluru specifically",
     ],
   },
   {
@@ -159,7 +172,7 @@ export const SCHEMES: Scheme[] = [
     officialUrl: "https://eitbt.karnataka.gov.in/startup/public/109/wescalate/en",
     depth: "full",
     overview:
-      "WEscalate runs two connected tracks for women-led startups in a small set of sectors — an incubation track for early-stage founders and an acceleration track for those ready to scale — delivered through partner incubators rather than run directly by the department.",
+      "WEscalate runs two connected tracks for women-led startups in a small set of sectors, an incubation track for early-stage founders and an acceleration track for those ready to scale, delivered through partner incubators rather than run directly by the department.",
     objectives: [
       "Support early-stage women entrepreneurs through structured incubation",
       "Help growth-stage women-led startups scale up with funding and market access",
@@ -170,6 +183,10 @@ export const SCHEMES: Scheme[] = [
       "Sector is Biotech, AgriTech, MedTech/Healthtech, or Cleantech",
       "Early-stage (for the incubation track) or growth/scale-up stage (for the acceleration track)",
     ],
+    sensitiveGate: {
+      askedKeyword: "women",
+      confirmKeywords: ["yes", "yeah", "yep", "correct", "i am", "we are", "woman-led", "women-led"],
+    },
     programStructure: [
       "30 startups supported per year across 2 sector-specific cohorts of 15 each",
       "Incubation track: 6 months, up to ₹20 lakh grant-in-aid per cohort",
@@ -190,7 +207,7 @@ export const SCHEMES: Scheme[] = [
     officialUrl: "https://eitbt.karnataka.gov.in/startup/public/112/grassroot-innovation/en",
     depth: "full",
     overview:
-      "This programme is deliberately not aimed at typical tech founders — it exists to fund practical, working innovations from people like farmers, artisans, labourers, and technicians who've solved a real local problem but sit outside the usual startup-funding conversation entirely.",
+      "This programme is deliberately not aimed at typical tech founders, it exists to fund practical, working innovations from people like farmers, artisans, labourers, and technicians who've solved a real local problem but sit outside the usual startup-funding conversation entirely.",
     objectives: [
       "Recognise and fund innovation happening outside formal startup channels",
       "Help commercialise genuinely useful local inventions",
@@ -221,7 +238,7 @@ export const SCHEMES: Scheme[] = [
     officialUrl: "https://eitbt.karnataka.gov.in/startup/public/116/preferential-market-access/en",
     depth: "full",
     overview:
-      "PMA isn't a grant — it's a market-access mechanism. Once empanelled, a startup can be procured from directly by state departments and PSUs, without going through the usual open-tender barriers that normally favour larger, established vendors.",
+      "PMA isn't a grant, it's a market-access mechanism. Once empanelled, a startup can be procured from directly by state departments and PSUs, without going through the usual open-tender barriers that normally favour larger, established vendors.",
     objectives: [
       "Give startups a realistic path to government customers",
       "Encourage state departments to consider startup vendors, not just established suppliers",
@@ -248,7 +265,7 @@ export const SCHEMES: Scheme[] = [
     officialUrl: "https://elevate.startupkarnataka.in/",
     depth: "light",
     overview:
-      "ELEVATE is the state's main recurring grant-in-aid program for incorporated startups, run as separate yearly (and sometimes regional or DeepTech-specific) editions — including ELEVATE NxT 2026, ELEVATE 2025, ELEVATE 2024, ELEVATE Kalyana Karnataka 2022, Amrita Startups 2022, and an ELEVATE Pitch Masterclass. Each edition has its own eligibility and funding cap, so check the specific edition you're applying to on the official microsite.",
+      "ELEVATE is the state's main recurring grant-in-aid program for incorporated startups, run as separate yearly (and sometimes regional or DeepTech-specific) editions, including ELEVATE NxT 2026, ELEVATE 2025, ELEVATE 2024, ELEVATE Kalyana Karnataka 2022, Amrita Startups 2022, and an ELEVATE Pitch Masterclass. Each edition has its own eligibility and funding cap, so check the specific edition you're applying to on the official microsite.",
   },
   {
     id: "grand-challenges",
@@ -258,7 +275,7 @@ export const SCHEMES: Scheme[] = [
     officialUrl: "https://eitbt.karnataka.gov.in/startup/public/47/grand-challenges-of-karnataka/en",
     depth: "light",
     overview:
-      "A challenge-based program looking for real technology solutions to persistent public issues — things like urban development, healthcare access, food security, environmental quality, and education — with a stated goal of surfacing at least 25 solutions with measurable social impact.",
+      "A challenge-based program looking for real technology solutions to persistent public issues, things like urban development, healthcare access, food security, environmental quality, and education, with a stated goal of surfacing at least 25 solutions with measurable social impact.",
   },
   {
     id: "beyond-bengaluru-seed-fund",
@@ -268,7 +285,7 @@ export const SCHEMES: Scheme[] = [
     officialUrl: "https://eitbt.karnataka.gov.in/startup/public/50/beyond-bengaluru-cluster-seed-fund/en",
     depth: "light",
     overview:
-      "Provides seed capital, mentorship, and investor-network access specifically to early-stage startups working in emerging technology clusters outside Bengaluru Urban District — the goal is narrowing the funding gap between Bengaluru and the rest of the state.",
+      "Provides seed capital, mentorship, and investor-network access specifically to early-stage startups working in emerging technology clusters outside Bengaluru Urban District, the goal is narrowing the funding gap between Bengaluru and the rest of the state.",
   },
   {
     id: "fund-of-funds",
@@ -278,7 +295,7 @@ export const SCHEMES: Scheme[] = [
     officialUrl: "https://eitbt.karnataka.gov.in/startup/public/49/fund-of-funds/en",
     depth: "light",
     overview:
-      "An indirect funding vehicle (invests via other funds, not directly into startups) aimed at ventures with longer gestation periods — deep-science and R&D-heavy startups in particular — with priority given to startups from the Beyond-Bengaluru clusters.",
+      "An indirect funding vehicle (invests via other funds, not directly into startups) aimed at ventures with longer gestation periods, deep-science and R&D-heavy startups in particular, with priority given to startups from the Beyond-Bengaluru clusters.",
   },
   {
     id: "kitven",
@@ -288,7 +305,7 @@ export const SCHEMES: Scheme[] = [
     officialUrl: "http://www.kitven.in/",
     isExternal: true,
     depth: "light",
-    overview: "A state-backed venture fund operating as its own entity — visit its site directly for current fund details and how to pitch.",
+    overview: "A state-backed venture fund operating as its own entity, visit its site directly for current fund details and how to pitch.",
   },
 
   // ───────────────────────── STARTUP KIT (lighter depth) ─────────────────────────
@@ -300,7 +317,7 @@ export const SCHEMES: Scheme[] = [
     officialUrl: "https://site.karnataka.letsventure.com/",
     isExternal: true,
     depth: "light",
-    overview: "A partnership giving Karnataka startups access to LetsVenture's investor and mentorship network — visit the partner site directly to register.",
+    overview: "A partnership giving Karnataka startups access to LetsVenture's investor and mentorship network, visit the partner site directly to register.",
   },
   {
     id: "propel",
@@ -310,7 +327,7 @@ export const SCHEMES: Scheme[] = [
     officialUrl: "https://propel.eitbt.karnataka.gov.in/",
     isExternal: true,
     depth: "light",
-    overview: "A dedicated platform for startup enablement and acceleration support — visit directly for current programs.",
+    overview: "A dedicated platform for startup enablement and acceleration support, visit directly for current programs.",
   },
   {
     id: "booster-kit",
@@ -320,7 +337,7 @@ export const SCHEMES: Scheme[] = [
     officialUrl: "https://eitbt.karnataka.gov.in/startup/public/129/booster-kit/en",
     depth: "light",
     overview:
-      "A curated list of partner organisations offering free or discounted services to registered startups — things like company-management tools, investor-readiness support, legal/IP/incorporation help, and market research. Partners are listed at the organisation level; see the official page for the current partner list and how to claim an offer.",
+      "A curated list of partner organisations offering free or discounted services to registered startups, things like company-management tools, investor-readiness support, legal/IP/incorporation help, and market research. Partners are listed at the organisation level; see the official page for the current partner list and how to claim an offer.",
   },
   {
     id: "incentives-2025-30",
@@ -330,7 +347,7 @@ export const SCHEMES: Scheme[] = [
     officialUrl: "https://eitbt.karnataka.gov.in/startup/public/151/incentives-2025-30/en",
     depth: "light",
     overview:
-      "Startups that meet the Karnataka Startup Policy 2025-30's definition of a \"Startup\" and are registered with KITS can claim a set of fiscal incentives, including reimbursement of State GST — see the official page for the full list of incentives and eligibility detail.",
+      "Startups that meet the Karnataka Startup Policy 2025-30's definition of a \"Startup\" and are registered with KITS can claim a set of fiscal incentives, including reimbursement of State GST, see the official page for the full list of incentives and eligibility detail.",
   },
   {
     id: "incubation-hub",
@@ -350,6 +367,44 @@ export function getSchemeById(id: string): Scheme | undefined {
 
 export function getSchemesByCategory(category: SchemeCategory): Scheme[] {
   return SCHEMES.filter((s) => s.category === category);
+}
+
+/**
+ * The chatbot's content engine: serialises every field of every scheme
+ * into one grounding block for the assistant's system prompt. This is the
+ * only source of scheme facts the model is allowed to draw on, so it
+ * includes everything, not just a summary, eligibility, structure,
+ * evaluation weightage, benefits, deadlines, documents, contact details.
+ */
+export function buildSchemeGroundingText(): string {
+  return SCHEMES.map((s) => {
+    const lines = [
+      `ID: ${s.id}`,
+      `Name: ${s.name}`,
+      `Category: ${CATEGORY_LABELS[s.category]}`,
+      `Tagline: ${s.tagline}`,
+      `Overview: ${s.overview}`,
+    ];
+    if (s.objectives) lines.push(`Objectives: ${s.objectives.join("; ")}`);
+    if (s.eligibility) {
+      lines.push(`${s.eligibilityLabel ?? "Eligibility Criteria"}: ${s.eligibility.join("; ")}`);
+    }
+    if (s.programStructure) lines.push(`Program structure and budget: ${s.programStructure.join("; ")}`);
+    if (s.evaluationSteps) lines.push(`Evaluation steps: ${s.evaluationSteps.join("; ")}`);
+    if (s.evaluationCriteria) {
+      lines.push(
+        `Evaluation weightage: ${s.evaluationCriteria.map((c) => `${c.criterion} (${c.weight} points)`).join(", ")}`
+      );
+    }
+    if (s.benefits) lines.push(`Benefits: ${s.benefits.join("; ")}`);
+    if (s.applicationProcess) lines.push(`Application process: ${s.applicationProcess}`);
+    if (s.deadlineNote) lines.push(`Deadline note: ${s.deadlineNote}`);
+    if (s.documentsRequired) lines.push(`Documents required: ${s.documentsRequired.join("; ")}`);
+    if (s.contact) lines.push(`Contact: ${s.contact}`);
+    if (s.unverifiedNote) lines.push(`Data caveat: ${s.unverifiedNote}`);
+    lines.push(`Official URL: ${s.officialUrl}`);
+    return lines.join("\n");
+  }).join("\n\n");
 }
 
 export const CATEGORY_LABELS: Record<SchemeCategory, string> = {

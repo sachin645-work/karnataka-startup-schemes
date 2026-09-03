@@ -13,7 +13,7 @@ export function SiteHeader() {
 
   return (
     <header>
-      {/* Utility bar — layout matched, left zone left blank (no logo/login to place there) */}
+      {/* Utility bar, layout matched, left zone left blank (no logo/login to place there) */}
       <div className="bg-[#1a1a1a] text-white text-xs">
         <div className="mx-auto max-w-6xl px-4 py-1.5 flex items-center justify-end">
           <div className="flex items-center gap-3 opacity-80">
@@ -25,7 +25,7 @@ export function SiteHeader() {
         </div>
       </div>
 
-      {/* Masthead — text-based wordmark in place of the logo mark */}
+      {/* Masthead, text-based wordmark in place of the logo mark */}
       <div className="border-b border-govgray-300 bg-white">
         <div className="mx-auto max-w-6xl px-4 py-4 flex items-center gap-2">
           <span className="text-govorange-500 text-2xl font-black leading-none" aria-hidden="true">

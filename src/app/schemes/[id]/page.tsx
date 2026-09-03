@@ -129,7 +129,7 @@ export default async function SchemeDetailPage({ params }: { params: Promise<{ i
                 <span
                   key={i}
                   className="rounded border border-govgray-300 px-4 py-2 text-sm text-govgray-700 bg-govgray-50"
-                  title="Placeholder — not a real file"
+                  title="Placeholder, not a real file"
                 >
                   📄 {d} (sample)
                 </span>

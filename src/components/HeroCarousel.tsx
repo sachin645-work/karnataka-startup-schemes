@@ -64,7 +64,7 @@ export function HeroCarousel() {
           </div>
         </div>
 
-        {/* Right panel — poster-style card, navy as an accent within the card, not the page */}
+        {/* Right panel, poster-style card, navy as an accent within the card, not the page */}
         <div className="rounded-lg bg-govblue-900 text-white p-8 text-center shadow-lg">
           <p className="text-[10px] tracking-widest uppercase text-white/60">
             Startup Ecosystem Portal

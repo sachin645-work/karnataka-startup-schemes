@@ -3,6 +3,7 @@ import { Nunito, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { ChatWidget } from "@/components/ChatWidget";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -17,7 +18,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Karnataka Startup Schemes",
   description:
-    "An independent, unofficial guide to Karnataka's startup schemes and programs — browse schemes, check eligibility, and go straight to the official application page.",
+    "An independent, unofficial guide to Karnataka's startup schemes and programs, browse schemes, check eligibility, and go straight to the official application page.",
 };
 
 export const viewport: Viewport = {
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteHeader />
         <div className="flex-1 flex flex-col">{children}</div>
         <SiteFooter />
+        <ChatWidget />
       </body>
     </html>
   );

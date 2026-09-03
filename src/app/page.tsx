@@ -33,7 +33,7 @@ export default function Home() {
           </h2>
           <p className="mt-4 text-govgray-700 leading-relaxed">
             Karnataka runs a genuinely large number of startup schemes and programs, spread
-            across funding, incubation, and market-access tracks — but they live on separate
+            across funding, incubation, and market-access tracks, but they live on separate
             pages with separate eligibility rules. This site pulls them into one place so you
             can see what actually applies to you, in plain language, before heading to the
             official source to apply.
@@ -45,10 +45,10 @@ export default function Home() {
       <section className="bg-white">
         <div className="mx-auto max-w-6xl px-4 py-14">
           <h2 className="text-2xl font-bold text-govblue-900 text-center mb-2">
-            Karnataka Startup Policy 2025-30 — Pillars
+            Karnataka Startup Policy 2025-30, Pillars
           </h2>
           <p className="text-center text-govgray-700/70 mb-8 max-w-2xl mx-auto">
-            The state&apos;s current startup policy is organised around six pillars — most
+            The state&apos;s current startup policy is organised around six pillars, most
             schemes on this site map to one or more of them.
           </p>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -65,12 +65,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Initiatives preview strip — poster-style cards, static per scope */}
+      {/* Initiatives preview strip, poster-style cards, static per scope */}
       <section className="bg-white border-t border-govgray-300">
         <div className="mx-auto max-w-6xl px-4 py-14">
           <h2 className="text-2xl font-bold text-center text-govblue-900">Initiatives under Startup Karnataka</h2>
           <p className="text-center text-govgray-700/70 mt-2 mb-10">
-            A preview of what&apos;s available — see the full list on the Schemes page.
+            A preview of what&apos;s available, see the full list on the Schemes page.
           </p>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {SCHEMES.slice(0, 4).map((s) => (

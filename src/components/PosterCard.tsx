@@ -5,7 +5,7 @@ import Link from "next/link";
  * panel with a bold title, a circular icon badge overlapping the panel's
  * bottom edge, then a white lower panel with title/description/CTA. The
  * source site's own logo mark inside the navy panel is intentionally
- * omitted — everything else about the pattern is reproduced.
+ * omitted, everything else about the pattern is reproduced.
  */
 export function PosterCard({
   href,

@@ -42,7 +42,7 @@ export function SiteFooter() {
         <span>Version: preview-1.0</span>
       </div>
       <div className="border-t border-white/10 py-3 text-center text-xs text-white/60">
-        © 2026 Karnataka Startup Schemes — an independent project, unaffiliated with any government body.
+        © 2026 Karnataka Startup Schemes, an independent project, unaffiliated with any government body.
       </div>
     </footer>
   );
