@@ -11,7 +11,7 @@ type Recommendation = { schemeId: string; why: string };
 export type ChatWidgetHandle = { open: () => void };
 
 const OPENING_MESSAGE =
-  "Hi! I'm Ankura's assistant. I'll ask a few quick questions and point you toward Karnataka startup schemes you might qualify for. What's your name?";
+  "Hi! I'm this site's assistant. I'll ask a few quick questions and point you toward Karnataka startup schemes you might qualify for. What's your name?";
 
 export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_props, ref) {
   const [isOpen, setIsOpen] = useState(false);
@@ -92,7 +92,7 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
       <button
         type="button"
         onClick={toggle}
-        aria-label={isOpen ? "Close Ankura chat" : "Open Ankura chat"}
+        aria-label={isOpen ? "Close chat" : "Open chat"}
         className="fixed bottom-5 right-5 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-govorange-500 text-white shadow-lg hover:bg-govorange-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-700 focus-visible:ring-offset-2"
       >
         {isOpen ? (
@@ -109,7 +109,7 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
       {isOpen && (
         <div className="fixed bottom-24 right-5 z-50 flex h-[560px] w-[380px] max-w-[calc(100vw-2.5rem)] flex-col rounded-lg border border-govgray-200 bg-white shadow-2xl">
           <div className="rounded-t-lg border-b border-govgray-200 bg-govblue-900 px-4 py-3">
-            <p className="font-semibold text-white">Ankura</p>
+            <p className="font-semibold text-white">Karnataka Startup Schemes</p>
             <p className="text-xs text-white/70">
               Independent, unofficial — not a government service.
             </p>

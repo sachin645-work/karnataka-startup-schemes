@@ -48,10 +48,10 @@ export default function Home() {
         <div className="mx-auto max-w-6xl px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="h-11 w-11 rounded-full bg-govblue-700 text-white flex items-center justify-center font-bold text-lg">
-              A
+              K
             </div>
             <div>
-              <p className="font-semibold text-govblue-900 leading-tight">Ankura</p>
+              <p className="font-semibold text-govblue-900 leading-tight">Karnataka Startup Schemes</p>
               <p className="text-xs text-govgray-700/70 leading-tight">
                 Independent Startup Scheme Discovery
               </p>
@@ -84,7 +84,7 @@ export default function Home() {
             Find the Karnataka startup scheme that&apos;s actually yours
           </h1>
           <p className="mt-4 max-w-xl mx-auto text-govblue-50/90">
-            Ankura asks a few natural questions, then points you to the real
+            Karnataka Startup Schemes asks a few natural questions, then points you to the real
             schemes on the Startup Karnataka portal you&apos;re likely
             eligible for.
           </p>
@@ -111,9 +111,9 @@ export default function Home() {
           photos/quotes */}
       <section id="about" className="bg-white">
         <div className="mx-auto max-w-3xl px-4 py-14 text-center">
-          <h2 className="text-2xl font-bold text-govblue-900">About Ankura</h2>
+          <h2 className="text-2xl font-bold text-govblue-900">About This Site</h2>
           <p className="mt-4 text-govgray-700">
-            Ankura is a small, independent project — not a government
+            This is a small, independent project — not a government
             service, and not affiliated with the Government of Karnataka in
             any way. It exists to make one thing easier: figuring out which
             of the many real Startup Karnataka schemes actually apply to
@@ -187,7 +187,7 @@ export default function Home() {
       <footer className="bg-govgray-50 border-t border-govgray-200 mt-auto">
         <div className="mx-auto max-w-6xl px-4 py-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 text-sm">
           <div>
-            <p className="font-semibold text-govblue-900 mb-2">Ankura</p>
+            <p className="font-semibold text-govblue-900 mb-2">Karnataka Startup Schemes</p>
             <p className="text-govgray-700/80">
               Independent, unofficial discovery tool. Not a government
               service, and not affiliated with the Government of Karnataka.
@@ -228,7 +228,7 @@ export default function Home() {
           </div>
         </div>
         <div className="border-t border-govgray-200 py-4 text-center text-xs text-govgray-700/60">
-          © 2026 Ankura — an independent project, unaffiliated with any government body.
+          © 2026 Karnataka Startup Schemes — an independent project, unaffiliated with any government body.
         </div>
       </footer>
 

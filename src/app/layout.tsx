@@ -13,11 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ankura",
+  title: "Karnataka Startup Schemes",
   description:
-    "Ankura is an independent AI assistant that helps you discover which Karnataka government startup schemes you might qualify for — sourced only from the official Startup Karnataka portal.",
+    "Karnataka Startup Schemes is an independent AI assistant that helps you discover which Karnataka government startup schemes you might qualify for — sourced only from the official Startup Karnataka portal.",
   openGraph: {
-    title: "Ankura",
+    title: "Karnataka Startup Schemes",
     description:
       "An independent AI assistant for discovering Karnataka startup schemes — sourced only from the official Startup Karnataka portal.",
     type: "website",
