@@ -33,6 +33,22 @@ export type Scheme = {
   reason: (a: Answers) => string;
 };
 
+/** Every filter key that can appear on a Scheme, kept as a single source of
+ * truth so the "does the checker read every key" test can't drift from the
+ * actual Scheme type without also updating the test. */
+export const FILTER_KEYS = [
+  "requireState",
+  "requireCitizenIndia",
+  "minAge",
+  "maxAge",
+  "allowedStudentStatus",
+  "requiresPrototype",
+  "allowedDpiitStatus",
+  "requiresNoRevenue",
+] as const satisfies readonly (keyof Scheme["filters"])[];
+
+export const SCHEME_DATA_LAST_VERIFIED = "2026-09-02";
+
 export const SCHEMES: Scheme[] = [
   {
     id: "nidhi-prayas",
@@ -134,22 +150,102 @@ export const SCHEMES: Scheme[] = [
   },
 ];
 
-export function matchSchemes(answers: Answers): { scheme: Scheme; reason: string }[] {
-  return SCHEMES.filter((scheme) => passesFilters(scheme, answers)).map((scheme) => ({
-    scheme,
-    reason: scheme.reason(answers),
-  }));
+export type Classification = "now" | "later" | "not_applicable";
+
+export type ScoredScheme = {
+  scheme: Scheme;
+  status: Classification;
+  /** "Now": why it matches. "Later": what would unlock it. "Not applicable": why it never will. */
+  reason: string;
+};
+
+const DPIIT_ORDER: DpiitStatus[] = ["not_registered", "registered_not_dpiit", "dpiit_recognized"];
+
+/**
+ * Classifies one scheme against a full set of answers. A scheme is:
+ * - "now" if every filter passes.
+ * - "not_applicable" if any filter fails for a reason that cannot change
+ *   (wrong state/citizenship, aged out, past a revenue or registration
+ *   ceiling the scheme requires staying under).
+ * - "later" if every failing filter is one the student can still grow into
+ *   (not yet old enough, not yet graduated, no prototype yet, not yet
+ *   registered/DPIIT-recognized).
+ *
+ * A scheme with both a permanent and a progressable failure is
+ * not_applicable — a permanent blocker makes the progressable one moot.
+ */
+export function classifyScheme(scheme: Scheme, a: Answers): ScoredScheme {
+  const f = scheme.filters;
+  const permanent: string[] = [];
+  const later: string[] = [];
+
+  if (f.requireState !== undefined && a.state !== f.requireState) {
+    permanent.push(`only open to ${f.requireState} residents`);
+  }
+  if (f.requireCitizenIndia && !a.isIndianCitizen) {
+    permanent.push("requires Indian citizenship");
+  }
+  if (f.maxAge !== undefined && a.age > f.maxAge) {
+    permanent.push(`requires age ${f.maxAge} or under`);
+  }
+  if (f.minAge !== undefined && a.age < f.minAge) {
+    later.push(`unlocks once you turn ${f.minAge}`);
+  }
+  if (f.allowedStudentStatus !== undefined && !f.allowedStudentStatus.includes(a.studentStatus)) {
+    if (f.allowedStudentStatus.includes("graduated") && a.studentStatus === "enrolled") {
+      later.push("unlocks once you graduate");
+    } else {
+      permanent.push("doesn't match your student status");
+    }
+  }
+  if (f.requiresPrototype && !a.hasPrototype) {
+    later.push("unlocks once you have a working prototype");
+  }
+  if (f.allowedDpiitStatus !== undefined && !f.allowedDpiitStatus.includes(a.dpiitStatus)) {
+    const currentIdx = DPIIT_ORDER.indexOf(a.dpiitStatus);
+    const allowedIdxs = f.allowedDpiitStatus.map((s) => DPIIT_ORDER.indexOf(s));
+    const minAllowed = Math.min(...allowedIdxs);
+    const maxAllowed = Math.max(...allowedIdxs);
+    if (currentIdx < minAllowed) {
+      later.push(
+        DPIIT_ORDER[minAllowed] === "dpiit_recognized"
+          ? "unlocks once you're DPIIT-recognized"
+          : "unlocks once you register your startup"
+      );
+    } else if (currentIdx > maxAllowed) {
+      permanent.push("is only for an earlier registration stage than yours");
+    }
+  }
+  if (f.requiresNoRevenue && a.hasRevenue) {
+    permanent.push("is only for ventures with no revenue yet");
+  }
+
+  if (permanent.length === 0 && later.length === 0) {
+    return { scheme, status: "now", reason: scheme.reason(a) };
+  }
+  if (permanent.length > 0) {
+    const reason = permanent[0];
+    return { scheme, status: "not_applicable", reason: reason.charAt(0).toUpperCase() + reason.slice(1) };
+  }
+  const reason = later[0];
+  return { scheme, status: "later", reason: reason.charAt(0).toUpperCase() + reason.slice(1) };
 }
 
-function passesFilters(scheme: Scheme, a: Answers): boolean {
-  const f = scheme.filters;
-  if (f.requireState && a.state !== f.requireState) return false;
-  if (f.requireCitizenIndia && !a.isIndianCitizen) return false;
-  if (f.minAge !== undefined && a.age < f.minAge) return false;
-  if (f.maxAge !== undefined && a.age > f.maxAge) return false;
-  if (f.allowedStudentStatus && !f.allowedStudentStatus.includes(a.studentStatus)) return false;
-  if (f.requiresPrototype && !a.hasPrototype) return false;
-  if (f.allowedDpiitStatus && !f.allowedDpiitStatus.includes(a.dpiitStatus)) return false;
-  if (f.requiresNoRevenue && a.hasRevenue) return false;
-  return true;
+export function classifySchemes(answers: Answers): {
+  now: ScoredScheme[];
+  later: ScoredScheme[];
+  notApplicable: ScoredScheme[];
+} {
+  const scored = SCHEMES.map((scheme) => classifyScheme(scheme, answers));
+  return {
+    now: scored.filter((s) => s.status === "now"),
+    later: scored.filter((s) => s.status === "later"),
+    notApplicable: scored.filter((s) => s.status === "not_applicable"),
+  };
 }
+
+/** States with at least one state-scoped scheme in this dataset. Used to
+ * show honest coverage copy instead of a silent empty/Karnataka-only result. */
+export const COVERED_STATES = Array.from(
+  new Set(SCHEMES.map((s) => s.filters.requireState).filter((s): s is string => s !== undefined))
+);

@@ -11,22 +11,25 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  /* Navy — primary, formal/official register (from Karnataka EITBT reference) */
+  /* Navy — primary, formal/official register (from Karnataka EITBT reference).
+     navy-600 is the primary-action blue, deliberately kept bright enough to
+     read as blue rather than near-black. */
   --color-navy-50: #eef3f9;
   --color-navy-100: #dde8f3;
   --color-navy-300: #9db6d6;
   --color-navy-500: #3d6ba3;
-  --color-navy-700: #1c4a7a;
+  --color-navy-600: #0b4f8a;
+  --color-navy-700: #1a3a6b;
   --color-navy-800: #14345c;
   --color-navy-900: #0f2a4a;
   --color-navy-950: #0a1930;
 
-  /* Gold/orange — accent, matches / delight moments */
-  --color-gold-50: #fdf3e6;
-  --color-gold-100: #fbe6c9;
-  --color-gold-500: #e08a1e;
-  --color-gold-600: #c9740f;
-  --color-gold-700: #a35e0c;
+  /* Maroon — accent, used ONLY for warnings / unverified-data flags, never
+     for primary actions or as a "this matched" indicator. */
+  --color-maroon-50: #fbeef0;
+  --color-maroon-100: #f5d7db;
+  --color-maroon-600: #7a2331;
+  --color-maroon-700: #611b26;
 }
 
 body {

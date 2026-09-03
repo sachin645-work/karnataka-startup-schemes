@@ -51,9 +51,10 @@ export function Chatbot() {
   return (
     <>
       <button
+        type="button"
         onClick={toggle}
         aria-label={open ? "Close help chat" : "Open help chat"}
-        className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-navy-900 text-white shadow-lg hover:bg-navy-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-500"
+        className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-navy-600 text-white shadow-lg hover:bg-navy-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-800"
       >
         {open ? (
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -86,7 +87,7 @@ export function Chatbot() {
                 key={i}
                 className={
                   m.role === "user"
-                    ? "ml-auto max-w-[85%] rounded-lg bg-navy-900 px-3 py-2 text-sm text-white"
+                    ? "ml-auto max-w-[85%] rounded-lg bg-navy-600 px-3 py-2 text-sm text-white"
                     : "mr-auto max-w-[85%] rounded-lg bg-navy-50 px-3 py-2 text-sm text-navy-800"
                 }
               >
@@ -97,15 +98,19 @@ export function Chatbot() {
           </div>
 
           <form onSubmit={send} className="flex gap-2 border-t border-navy-100 p-3">
+            <label htmlFor="chat-input" className="sr-only">
+              Ask a question
+            </label>
             <input
+              id="chat-input"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type a question…"
-              className="flex-1 rounded-lg border border-navy-200 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
+              className="flex-1 rounded-lg border border-navy-200 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-600"
             />
             <button
               type="submit"
-              className="rounded-lg bg-navy-900 px-3 py-2 text-sm font-medium text-white hover:bg-navy-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-500"
+              className="rounded-lg bg-navy-600 px-3 py-2 text-sm font-medium text-white hover:bg-navy-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-navy-600"
             >
               Send
             </button>
