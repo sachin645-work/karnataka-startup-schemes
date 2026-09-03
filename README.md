@@ -1,55 +1,40 @@
-# Scheme Finder
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-Single-page discovery tool for Karnataka student entrepreneurs (with a working
-prototype) to find which government schemes actually apply to them — not an
-official government platform, links out to the real official pages.
+## Getting Started
 
-## Setup
+First, run the development server:
 
-1. **Install dependencies** (already done if you cloned this as-is):
-   ```
-   npm install
-   ```
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-2. **Create a Supabase project** at supabase.com.
-   - In Authentication → Providers, enable **Google** and follow Supabase's
-     guide to set the OAuth client ID/secret from Google Cloud Console.
-   - In Authentication → URL Configuration, add `http://localhost:3000/auth/callback`
-     (and your production URL once deployed) as a redirect URL.
-   - Run `supabase/schema.sql` in the SQL editor (optional for v1 — the app's
-     matching logic reads from `src/lib/schemes.ts` directly; this table is
-     for reference/future admin editing).
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-3. **Get a Groq API key** at console.groq.com/keys — powers the chatbot.
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-4. **Get a Mixpanel project token** — Settings → Project Settings → Access
-   Keys. Leave blank locally if you just want events logged to the console.
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load Geist, a new font family for Vercel.
 
-5. Copy `.env.local.example` to `.env.local` and fill in the four values.
+## Environment
 
-6. Run it:
-   ```
-   npm run dev
-   ```
+This project is already wired up to real external services (see `.env.local.example` for the variable names): Supabase (auth + data), Groq (LLM API), and Mixpanel (event tracking). Copy `.env.local.example` to `.env.local` and fill in the values to reconnect to them.
 
-7. Deploy: push this repo to GitHub, import it in Vercel, and add the same
-   four environment variables in the Vercel project settings.
+## Learn More
 
-## What's deliberately not built
+To learn more about Next.js, take a look at the following resources:
 
-- No persisted user profiles — the question flow is re-asked fresh each
-  session (locked decision, not an oversight).
-- No "later" or partial-match messaging — a scheme either shows or it
-  doesn't.
-- No application processing — every card links out to the scheme's real
-  official page.
-- The chatbot never issues its own eligibility verdict — it always hands
-  eligibility questions back to the "Understand Me" flow.
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-## Scheme data accuracy
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-The 8 seeded schemes come from secondary research. Any tagline marked with
-an `unverifiedNote` in `src/lib/schemes.ts` has a fact (usually a funding
-figure) that varied across sources during research and hasn't been checked
-against the scheme's own official page — confirm before treating it as
-settled, especially before showing this to real users.
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

@@ -1,112 +1,103 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import type { User } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase/client";
-import { SCHEMES, Answers, matchSchemes } from "@/lib/schemes";
-import { track } from "@/lib/mixpanel";
-import { SchemeCard } from "@/components/SchemeCard";
-import { UnderstandMeFlow } from "@/components/UnderstandMeFlow";
-import { Chatbot } from "@/components/Chatbot";
+import Image from "next/image";
 
 export default function Home() {
-  const [user, setUser] = useState<User | null>(null);
-  const [showFlow, setShowFlow] = useState(false);
-  const [results, setResults] = useState<{ scheme: (typeof SCHEMES)[number]; reason: string }[] | null>(
-    null
-  );
-
-  useEffect(() => {
-    track("page_view");
-    const supabase = createClient();
-
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
-
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        track("google_signin_completed");
-        setShowFlow(true);
-      }
-    });
-
-    return () => sub.subscription.unsubscribe();
-  }, []);
-
-  function handleUnderstandMeClick() {
-    setShowFlow(true);
-    if (!user) return; // UnderstandMeFlow itself tracks the click before sign-in
-  }
-
-  function handleComplete(answers: Answers) {
-    const matches = matchSchemes(answers);
-    setResults(matches);
-    track("recommendations_shown", { count: matches.length });
-  }
-
   return (
-    <main className="min-h-screen bg-slate-50">
-      <section className="mx-auto max-w-4xl px-6 pt-16 pb-10 text-center">
-        <h1 className="text-3xl md:text-4xl font-bold text-slate-900">
-          Find the government schemes actually meant for you
-        </h1>
-        <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-          For Karnataka student entrepreneurs with a working prototype. Skip the
-          scattered portals — see which schemes apply to your stage, in one place.
-        </p>
-        <p className="mt-4 text-xs text-slate-500 max-w-xl mx-auto">
-          This is an independent discovery tool, not an official government platform.
-          All applications happen on the government&apos;s own site.
-        </p>
+    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+        <Image
+          className="dark:invert"
+          src="/next.svg"
+          alt="Next.js logo"
+          width={180}
+          height={38}
+          priority
+        />
+        <ol className="font-[family-name:var(--font-geist-mono)] list-inside list-decimal text-sm/6 text-center sm:text-left">
+          <li className="mb-2 tracking-[-.01em]">
+            Get started by editing{" "}
+            <code className="bg-black/[.05] dark:bg-white/[.06] font-[family-name:var(--font-geist-mono)] font-semibold px-1 py-0.5 rounded">
+              src/app/page.tsx
+            </code>
+            .
+          </li>
+          <li className="tracking-[-.01em]">
+            Save and see your changes instantly.
+          </li>
+        </ol>
 
-        {!results && (
-          <button
-            onClick={handleUnderstandMeClick}
-            className="mt-8 rounded-lg bg-slate-900 px-6 py-3 text-white font-medium hover:bg-slate-800"
+        <div className="flex gap-4 items-center flex-col sm:flex-row">
+          <a
+            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
+            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
+            target="_blank"
+            rel="noopener noreferrer"
           >
-            Understand Me →
-          </button>
-        )}
-      </section>
-
-      {showFlow && !results && (
-        <section className="mx-auto max-w-md px-6 pb-16">
-          <UnderstandMeFlow user={user} onComplete={handleComplete} />
-        </section>
-      )}
-
-      {results && (
-        <section className="mx-auto max-w-5xl px-6 pb-16">
-          <h2 className="text-xl font-semibold text-slate-900 mb-1">
-            Schemes that match you
-          </h2>
-          <p className="text-sm text-slate-500 mb-6">
-            {results.length === 0
-              ? "No current schemes match your answers."
-              : `${results.length} scheme${results.length > 1 ? "s" : ""} found.`}
-          </p>
-          {results.length > 0 && (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {results.map(({ scheme, reason }) => (
-                <SchemeCard key={scheme.id} scheme={scheme} reason={reason} source="results" />
-              ))}
-            </div>
-          )}
-        </section>
-      )}
-
-      <section className="mx-auto max-w-5xl px-6 pb-24">
-        <h2 className="text-xl font-semibold text-slate-900 mb-6">
-          All schemes
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {SCHEMES.map((scheme) => (
-            <SchemeCard key={scheme.id} scheme={scheme} source="browse" />
-          ))}
+            <Image
+              className="dark:invert"
+              src="/vercel.svg"
+              alt="Vercel logomark"
+              width={20}
+              height={20}
+            />
+            Deploy now
+          </a>
+          <a
+            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
+            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Read our docs
+          </a>
         </div>
-      </section>
-
-      <Chatbot />
-    </main>
+      </main>
+      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
+        <a
+          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Image
+            aria-hidden
+            src="/file.svg"
+            alt="File icon"
+            width={16}
+            height={16}
+          />
+          Learn
+        </a>
+        <a
+          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Image
+            aria-hidden
+            src="/window.svg"
+            alt="Window icon"
+            width={16}
+            height={16}
+          />
+          Examples
+        </a>
+        <a
+          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
+          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Image
+            aria-hidden
+            src="/globe.svg"
+            alt="Globe icon"
+            width={16}
+            height={16}
+          />
+          Go to nextjs.org →
+        </a>
+      </footer>
+    </div>
   );
 }
