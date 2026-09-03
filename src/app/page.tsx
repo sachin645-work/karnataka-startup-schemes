@@ -1,65 +1,28 @@
 import Link from "next/link";
-import { SCHEMES, getSchemeById } from "@/lib/schemes";
+import { SCHEMES } from "@/lib/schemes";
+import { HeroCarousel } from "@/components/HeroCarousel";
+import { PosterCard } from "@/components/PosterCard";
 
 const POLICY_PILLARS = [
-  { title: "Infrastructure", desc: "Growing physical and institutional infrastructure, with a deliberate push into regions beyond Bengaluru." },
-  { title: "Student ecosystem", desc: "Giving students across every stream real chances to build and test entrepreneurial skills, not just study them." },
-  { title: "Growth of startups", desc: "Aiming to grow the base of startups in the state and help more of them become genuine high-growth companies." },
-  { title: "Innovative technology", desc: "Encouraging tech solutions aimed squarely at social and environmental challenges, not just commercial ones." },
-  { title: "Incubation & acceleration", desc: "Building the incubation and acceleration infrastructure that turns early ideas into fundable companies." },
-  { title: "Funding avenues", desc: "Opening more paths to capital, from government grants to institutional and angel investment." },
+  { icon: "🏛", title: "Infrastructure", desc: "Growing physical and institutional infrastructure, with a deliberate push into regions beyond Bengaluru." },
+  { icon: "👥", title: "Student ecosystem", desc: "Giving students across every stream real chances to build and test entrepreneurial skills, not just study them." },
+  { icon: "⬆", title: "Growth of startups", desc: "Aiming to grow the base of startups in the state and help more of them become genuine high-growth companies." },
+  { icon: "🚀", title: "Innovative technology", desc: "Encouraging tech solutions aimed squarely at social and environmental challenges, not just commercial ones." },
+  { icon: "🤝", title: "Incubation & acceleration", desc: "Building the incubation and acceleration infrastructure that turns early ideas into fundable companies." },
+  { icon: "💰", title: "Funding avenues", desc: "Opening more paths to capital, from government grants to institutional and angel investment." },
 ];
 
 const IMPACT_STATS = [
-  { value: "Best Performer", label: "States' Startup Ranking, 4th Edition" },
-  { value: "₹170+ Cr", label: "Support disbursed to startups" },
-  { value: "40+", label: "Unicorns" },
-  { value: "14", label: "Centres of Excellence" },
+  { icon: "👥", value: "Best Performer", label: "States' Startup Ranking, 4th Edition" },
+  { icon: "🚀", value: "₹170+ Cr", label: "Support disbursed to startups" },
+  { icon: "⭐", value: "40+", label: "Unicorns" },
+  { icon: "🏛", value: "14", label: "Centres of Excellence" },
 ];
 
-const HERO_SCHEME_IDS = ["leap", "rgep"];
-
 export default function Home() {
-  const heroSchemes = HERO_SCHEME_IDS.map((id) => getSchemeById(id)!);
-
   return (
     <>
-      {/* Hero — original layout, real CTAs to real scheme pages */}
-      <section className="bg-govblue-900 text-white">
-        <div className="mx-auto max-w-6xl px-4 py-16 grid gap-8 md:grid-cols-2 items-center">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-extrabold leading-tight">
-              Find the Karnataka startup scheme that&apos;s actually built for you
-            </h1>
-            <p className="mt-4 text-govblue-50/90">
-              An independent, unofficial guide to every scheme and program under Startup
-              Karnataka — browse by category, check real eligibility criteria, and go straight
-              to the official page to apply.
-            </p>
-            <Link
-              href="/schemes"
-              className="mt-6 inline-block rounded bg-govorange-500 hover:bg-govorange-600 px-6 py-3 font-semibold transition-colors"
-            >
-              Explore Schemes →
-            </Link>
-          </div>
-          <div className="space-y-3">
-            {heroSchemes.map((s) => (
-              <Link
-                key={s.id}
-                href={`/schemes/${s.id}`}
-                className="block rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 p-4 transition-colors"
-              >
-                <p className="font-bold">{s.name}</p>
-                <p className="text-sm text-govblue-50/80 mt-1">{s.tagline}</p>
-                <span className="text-xs text-govorange-500 font-semibold mt-2 inline-block">
-                  Read more →
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      <HeroCarousel />
 
       {/* About */}
       <section className="bg-white">
@@ -90,8 +53,11 @@ export default function Home() {
           </p>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {POLICY_PILLARS.map((p) => (
-              <div key={p.title} className="rounded border border-govgray-200 bg-white p-5">
-                <p className="font-bold text-govblue-800">{p.title}</p>
+              <div key={p.title} className="rounded border border-govgray-300 bg-white p-5">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-govorange-500 text-white text-base" aria-hidden="true">
+                  {p.icon}
+                </span>
+                <p className="mt-3 font-bold text-govblue-900">{p.title}</p>
                 <p className="mt-1 text-sm text-govgray-700/80">{p.desc}</p>
               </div>
             ))}
@@ -99,25 +65,28 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Initiatives preview strip (static, per scope) */}
+      {/* Initiatives preview strip — poster-style cards, static per scope */}
       <section className="bg-govorange-500 text-white">
         <div className="mx-auto max-w-6xl px-4 py-14">
           <h2 className="text-2xl font-bold text-center">Initiatives under Startup Karnataka</h2>
-          <p className="text-center text-white/85 mt-2 mb-8">A preview of what&apos;s available — see the full list on the Schemes page.</p>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <p className="text-center text-white/85 mt-2 mb-10">
+            A preview of what&apos;s available — see the full list on the Schemes page.
+          </p>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {SCHEMES.slice(0, 4).map((s) => (
-              <div key={s.id} className="rounded-lg bg-white text-govgray-700 overflow-hidden">
-                <div className="bg-govblue-900 text-white px-4 py-6 text-center">
-                  <p className="font-extrabold text-lg">{s.name.split("(")[0].trim()}</p>
-                </div>
-                <div className="p-4">
-                  <p className="text-xs text-govgray-700/80">{s.tagline}</p>
-                </div>
-              </div>
+              <PosterCard
+                key={s.id}
+                href={s.isExternal ? s.officialUrl : `/schemes/${s.id}`}
+                isExternal={s.isExternal}
+                icon="⚡"
+                posterTitle={s.name.split("(")[0].trim()}
+                categoryLabel="Startup Karnataka"
+                tagline={s.tagline}
+              />
             ))}
           </div>
-          <div className="text-center mt-8">
-            <Link href="/schemes" className="inline-block rounded bg-govblue-900 hover:bg-govblue-800 px-6 py-3 font-semibold transition-colors">
+          <div className="text-center mt-10">
+            <Link href="/schemes" className="inline-block rounded bg-govblue-900 hover:opacity-90 px-6 py-3 font-semibold transition-opacity">
               View all schemes →
             </Link>
           </div>
@@ -133,7 +102,10 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {IMPACT_STATS.map((s) => (
               <div key={s.label} className="rounded-lg bg-govpink-50 p-5 text-center">
-                <p className="text-xl md:text-2xl font-extrabold text-govblue-900">{s.value}</p>
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-govblue-900 text-white text-lg" aria-hidden="true">
+                  {s.icon}
+                </span>
+                <p className="mt-3 text-xl md:text-2xl font-extrabold text-govblue-900">{s.value}</p>
                 <p className="mt-1 text-xs text-govgray-700/70">{s.label}</p>
               </div>
             ))}

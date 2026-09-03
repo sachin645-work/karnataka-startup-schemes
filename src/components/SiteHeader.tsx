@@ -26,7 +26,7 @@ export function SiteHeader() {
       </div>
 
       {/* Masthead — original identity, no government emblem/wordmark */}
-      <div className="border-b border-govgray-200 bg-white">
+      <div className="border-b border-govgray-300 bg-white">
         <div className="mx-auto max-w-6xl px-4 py-4 flex items-center gap-3">
           <div className="h-11 w-11 rounded-full bg-govblue-900 text-white flex items-center justify-center font-bold text-lg">
             K
@@ -62,7 +62,7 @@ export function SiteHeader() {
                 Initiatives ▾
               </button>
               {initiativesOpen && (
-                <div className="absolute left-0 top-full w-[560px] max-w-[90vw] bg-white text-govgray-700 shadow-xl border border-govgray-200 rounded-b grid grid-cols-3 gap-4 p-5">
+                <div className="absolute left-0 top-full w-[560px] max-w-[90vw] bg-white text-govgray-700 shadow-xl border border-govgray-300 rounded-b grid grid-cols-3 gap-4 p-5">
                   {CATEGORIES.map((cat) => (
                     <div key={cat}>
                       <p className="font-bold text-govblue-900 text-sm mb-2">{CATEGORY_LABELS[cat]}</p>

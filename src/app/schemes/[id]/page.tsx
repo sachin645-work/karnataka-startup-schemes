@@ -15,14 +15,14 @@ export default async function SchemeDetailPage({ params }: { params: Promise<{ i
     <main className="min-h-screen bg-white">
       <div className="bg-govblue-900 text-white">
         <div className="mx-auto max-w-4xl px-4 py-10">
-          <Link href="/schemes" className="text-sm text-govblue-50/80 hover:underline">
+          <Link href="/schemes" className="text-sm text-white/80 hover:underline">
             ← Back to all schemes
           </Link>
           <span className="mt-4 inline-block rounded-full bg-govorange-500 px-3 py-1 text-xs font-semibold">
             {CATEGORY_LABELS[scheme.category]}
           </span>
           <h1 className="mt-3 text-2xl md:text-3xl font-bold">{scheme.name}</h1>
-          <p className="mt-2 text-govblue-50/90">{scheme.tagline}</p>
+          <p className="mt-2 text-white/90">{scheme.tagline}</p>
           <div className="mt-6 flex gap-3 flex-wrap">
             <a
               href={scheme.officialUrl}
@@ -51,7 +51,7 @@ export default async function SchemeDetailPage({ params }: { params: Promise<{ i
           <Section title={scheme.eligibilityLabel ?? "Eligibility Criteria"}>
             <ul className="space-y-2">
               {scheme.eligibility.map((item, i) => (
-                <li key={i} className="flex gap-2 rounded bg-govgray-50 border border-govgray-200 px-3 py-2 text-sm text-govgray-700">
+                <li key={i} className="flex gap-2 rounded bg-govgray-50 border border-govgray-300 px-3 py-2 text-sm text-govgray-700">
                   <span className="text-govblue-700 font-bold" aria-hidden="true">✓</span>
                   <span>{item}</span>
                 </li>
@@ -77,16 +77,16 @@ export default async function SchemeDetailPage({ params }: { params: Promise<{ i
             )}
             {scheme.evaluationCriteria && (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm border border-govgray-200">
+                <table className="w-full text-sm border border-govgray-300">
                   <thead>
                     <tr className="bg-govgray-50 text-left">
-                      <th className="px-3 py-2 border-b border-govgray-200 text-govblue-900">Criterion</th>
-                      <th className="px-3 py-2 border-b border-govgray-200 text-govblue-900 text-right">Weight</th>
+                      <th className="px-3 py-2 border-b border-govgray-300 text-govblue-900">Criterion</th>
+                      <th className="px-3 py-2 border-b border-govgray-300 text-govblue-900 text-right">Weight</th>
                     </tr>
                   </thead>
                   <tbody>
                     {scheme.evaluationCriteria.map((c, i) => (
-                      <tr key={i} className="border-b border-govgray-100">
+                      <tr key={i} className="border-b border-govgray-300">
                         <td className="px-3 py-2 text-govgray-700">{c.criterion}</td>
                         <td className="px-3 py-2 text-govgray-700 text-right">{c.weight}</td>
                       </tr>
@@ -108,7 +108,7 @@ export default async function SchemeDetailPage({ params }: { params: Promise<{ i
           <Section title="Application Process & Important Dates">
             {scheme.applicationProcess && <p className="text-govgray-700">{scheme.applicationProcess}</p>}
             {scheme.deadlineNote && (
-              <p className="mt-2 flex items-start gap-1 text-sm text-maroon-700">
+              <p className="mt-2 flex items-start gap-1 text-sm text-govorange-600">
                 <span aria-hidden="true">ⓘ</span>
                 <span>{scheme.deadlineNote}</span>
               </p>
@@ -145,13 +145,13 @@ export default async function SchemeDetailPage({ params }: { params: Promise<{ i
         )}
 
         {scheme.unverifiedNote && (
-          <p className="flex items-start gap-1 text-xs text-maroon-700 border-t border-govgray-200 pt-4">
+          <p className="flex items-start gap-1 text-xs text-govorange-600 border-t border-govgray-300 pt-4">
             <span aria-hidden="true">⚠</span>
             <span>{scheme.unverifiedNote}</span>
           </p>
         )}
 
-        <p className="text-xs text-govgray-700/60 border-t border-govgray-200 pt-4">
+        <p className="text-xs text-govgray-700/60 border-t border-govgray-300 pt-4">
           This is an independent, unofficial summary. Always verify current eligibility, deadlines,
           and figures on the{" "}
           <a href={scheme.officialUrl} target="_blank" rel="noopener noreferrer" className="text-govblue-700 hover:underline">

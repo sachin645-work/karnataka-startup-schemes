@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { SCHEMES, CATEGORY_LABELS, SchemeCategory } from "@/lib/schemes";
+import { PosterCard } from "@/components/PosterCard";
 
 const TABS: (SchemeCategory | "all")[] = ["all", "funding", "schemes-programs", "startup-kit"];
 
@@ -26,7 +26,7 @@ export default function SchemesHubPage() {
       <div className="bg-govblue-900 text-white">
         <div className="mx-auto max-w-6xl px-4 py-12 text-center">
           <h1 className="text-3xl font-bold">Explore Schemes</h1>
-          <p className="mt-2 text-govblue-50/90">
+          <p className="mt-2 text-white/90">
             Browse every scheme and initiative under Startup Karnataka, grouped by category.
           </p>
         </div>
@@ -72,26 +72,17 @@ export default function SchemesHubPage() {
           {filtered.length} scheme{filtered.length !== 1 ? "s" : ""} found
         </p>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((s) => (
-            <Link
+            <PosterCard
               key={s.id}
-              href={`/schemes/${s.id}`}
-              className="block rounded-lg border border-govgray-200 bg-white overflow-hidden hover:shadow-md hover:border-govblue-700 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-700"
-            >
-              <div className="bg-govblue-900 px-4 py-3">
-                <span className="text-[10px] font-semibold uppercase tracking-wide text-govorange-500">
-                  {CATEGORY_LABELS[s.category]}
-                </span>
-                <p className="text-white font-semibold text-sm mt-0.5">{s.name}</p>
-              </div>
-              <div className="p-4">
-                <p className="text-sm text-govgray-700/80">{s.tagline}</p>
-                <span className="mt-3 inline-block text-sm font-medium text-govblue-700">
-                  {s.isExternal ? "Visit official site →" : "Read more →"}
-                </span>
-              </div>
-            </Link>
+              href={s.isExternal ? s.officialUrl : `/schemes/${s.id}`}
+              isExternal={s.isExternal}
+              icon="⚡"
+              posterTitle={s.name.split("(")[0].trim()}
+              categoryLabel={CATEGORY_LABELS[s.category]}
+              tagline={s.tagline}
+            />
           ))}
         </div>
       </div>

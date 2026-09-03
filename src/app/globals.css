@@ -12,20 +12,16 @@
   --font-mono: var(--font-geist-mono);
 
   --color-govblue-900: #0b1b4d;
-  --color-govblue-800: #0f2a6b;
   --color-govblue-700: #072577;
 
   --color-govorange-500: #e54825;
   --color-govorange-600: #c93a1a;
 
   --color-govgray-50: #f7f7f9;
-  --color-govgray-200: #e0e0e0;
   --color-govgray-300: #cccccc;
   --color-govgray-700: #333333;
 
   --color-govpink-50: #fdebec;
-
-  --color-maroon-700: #7a2331;
 }
 
 body {
