@@ -93,7 +93,7 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
         type="button"
         onClick={toggle}
         aria-label={isOpen ? "Close Ankura chat" : "Open Ankura chat"}
-        className="fixed bottom-5 right-5 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-cyan-400 text-ink-950 shadow-[0_0_24px_rgba(139,92,246,0.5)] hover:shadow-[0_0_32px_rgba(139,92,246,0.7)] transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900"
+        className="fixed bottom-5 right-5 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-govorange-500 text-white shadow-lg hover:bg-govorange-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-700 focus-visible:ring-offset-2"
       >
         {isOpen ? (
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
@@ -107,10 +107,10 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
       </button>
 
       {isOpen && (
-        <div className="fixed bottom-24 right-5 z-50 flex h-[560px] w-[380px] max-w-[calc(100vw-2.5rem)] flex-col rounded-2xl border border-ink-600 bg-ink-800 shadow-2xl">
-          <div className="rounded-t-2xl border-b border-ink-700 bg-gradient-to-r from-violet-600/20 to-cyan-500/20 px-4 py-3">
-            <p className="font-semibold text-ink-100">Ankura</p>
-            <p className="text-xs text-ink-300">
+        <div className="fixed bottom-24 right-5 z-50 flex h-[560px] w-[380px] max-w-[calc(100vw-2.5rem)] flex-col rounded-lg border border-govgray-200 bg-white shadow-2xl">
+          <div className="rounded-t-lg border-b border-govgray-200 bg-govblue-900 px-4 py-3">
+            <p className="font-semibold text-white">Ankura</p>
+            <p className="text-xs text-white/70">
               Independent, unofficial — not a government service.
             </p>
           </div>
@@ -121,19 +121,19 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
                 key={i}
                 className={
                   m.role === "user"
-                    ? "ml-auto max-w-[85%] rounded-2xl rounded-br-sm bg-violet-600 px-3 py-2 text-sm text-white"
-                    : "mr-auto max-w-[85%] rounded-2xl rounded-bl-sm bg-ink-700 px-3 py-2 text-sm text-ink-100"
+                    ? "ml-auto max-w-[85%] rounded-lg rounded-br-sm bg-govblue-700 px-3 py-2 text-sm text-white"
+                    : "mr-auto max-w-[85%] rounded-lg rounded-bl-sm bg-govgray-50 border border-govgray-200 px-3 py-2 text-sm text-govgray-700"
                 }
               >
                 {m.content}
               </div>
             ))}
-            {loading && <p className="text-xs text-ink-300">Thinking…</p>}
+            {loading && <p className="text-xs text-govgray-700/60">Thinking…</p>}
 
             {recommendations && (
               <div className="space-y-2 pt-1">
                 {recommendations.length === 0 && (
-                  <p className="text-sm text-ink-300">
+                  <p className="text-sm text-govgray-700/70">
                     Nothing here looks like a fit right now based on what you&apos;ve shared.
                   </p>
                 )}
@@ -147,11 +147,11 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => track("scheme_link_clicked", { scheme: scheme.id })}
-                      className="block rounded-xl border border-ink-600 bg-ink-900 p-3 hover:border-cyan-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 transition-colors"
+                      className="block rounded-lg border border-govgray-200 bg-white p-3 hover:border-govblue-700 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-700 transition-all"
                     >
-                      <p className="font-medium text-ink-100">{scheme.name}</p>
-                      <p className="mt-1 text-xs text-ink-300">{rec.why}</p>
-                      <span className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-cyan-400">
+                      <p className="font-medium text-govblue-900">{scheme.name}</p>
+                      <p className="mt-1 text-xs text-govgray-700/70">{rec.why}</p>
+                      <span className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-govblue-700">
                         View on official site
                         <svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                           <path d="M7 17L17 7M17 7H8M17 7V16" />
@@ -160,27 +160,27 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
                     </a>
                   );
                 })}
-                <p className="pt-1 text-[11px] text-ink-300">
+                <p className="pt-1 text-[11px] text-govgray-700/60">
                   Always verify eligibility and current status on the official page before relying on it.
                 </p>
               </div>
             )}
           </div>
 
-          <div className="border-t border-ink-700 p-3">
+          <div className="border-t border-govgray-200 p-3">
             {inputType === "yesno" && !loading && (
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => send("Yes")}
-                  className="flex-1 rounded-lg border border-ink-600 py-2 text-sm text-ink-100 hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                  className="flex-1 rounded border border-govgray-300 py-2 text-sm text-govgray-700 hover:bg-govgray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-700"
                 >
                   Yes
                 </button>
                 <button
                   type="button"
                   onClick={() => send("No")}
-                  className="flex-1 rounded-lg border border-ink-600 py-2 text-sm text-ink-100 hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                  className="flex-1 rounded border border-govgray-300 py-2 text-sm text-govgray-700 hover:bg-govgray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-700"
                 >
                   No
                 </button>
@@ -194,7 +194,7 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
                     key={o}
                     type="button"
                     onClick={() => send(o)}
-                    className="rounded-lg border border-ink-600 px-3 py-2 text-left text-sm text-ink-100 hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                    className="rounded border border-govgray-300 px-3 py-2 text-left text-sm text-govgray-700 hover:bg-govgray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-700"
                   >
                     {o}
                   </button>
@@ -213,12 +213,12 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
                   onChange={(e) => setTextValue(e.target.value)}
                   disabled={loading}
                   placeholder={started ? "Type your answer…" : "Say hi to get started…"}
-                  className="flex-1 rounded-lg border border-ink-600 bg-ink-900 px-3 py-2 text-sm text-ink-100 placeholder:text-ink-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                  className="flex-1 rounded border border-govgray-300 bg-white px-3 py-2 text-sm text-govgray-700 placeholder:text-govgray-700/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-700"
                 />
                 <button
                   type="submit"
                   disabled={loading}
-                  className="rounded-lg bg-gradient-to-br from-violet-500 to-cyan-400 px-3 py-2 text-sm font-medium text-ink-950 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+                  className="rounded bg-govorange-500 px-3 py-2 text-sm font-medium text-white hover:bg-govorange-600 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-700"
                 >
                   Send
                 </button>

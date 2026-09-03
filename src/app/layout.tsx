@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0a12",
+  themeColor: "#003da5",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -33,9 +33,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
-      data-theme="dark"
     >
-      <body className="min-h-full flex flex-col bg-ink-900 text-ink-100">{children}</body>
+      <body className="min-h-full flex flex-col bg-white text-govgray-700">{children}</body>
     </html>
   );
 }
