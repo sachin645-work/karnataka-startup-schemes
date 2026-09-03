@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -16,6 +16,16 @@ export const metadata: Metadata = {
   title: "Scheme Finder",
   description:
     "Find the government schemes actually meant for Karnataka student entrepreneurs with a working prototype.",
+  openGraph: {
+    title: "Scheme Finder",
+    description:
+      "Find the government schemes actually meant for Karnataka student entrepreneurs with a working prototype.",
+    type: "website",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0f2a4a",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
