@@ -376,34 +376,30 @@ export function getSchemesByCategory(category: SchemeCategory): Scheme[] {
  * includes everything, not just a summary, eligibility, structure,
  * evaluation weightage, benefits, deadlines, documents, contact details.
  */
+/**
+ * Compact grounding text for the chatbot's system prompt: only what's
+ * needed to route eligibility and hold a conversation, not the full
+ * detail-page content. The full Scheme objects (with objectives,
+ * evaluation weightage, documents, contact, and so on) still power the
+ * website's own /schemes pages, this function just doesn't repeat all of
+ * that on every chat turn.
+ *
+ * This exists because the full version blew through the Groq API key's
+ * per-minute token budget within one or two turns (the account's
+ * x-ratelimit-limit-tokens header showed an 8000 token/minute cap, and a
+ * single full-detail prompt was consuming nearly all of it), causing
+ * repeated json_validate_failed errors regardless of which model was
+ * used. Keeping this lean is a reliability requirement, not just a nice-
+ * to-have.
+ */
 export function buildSchemeGroundingText(): string {
   return SCHEMES.map((s) => {
-    const lines = [
-      `ID: ${s.id}`,
-      `Name: ${s.name}`,
-      `Category: ${CATEGORY_LABELS[s.category]}`,
-      `Tagline: ${s.tagline}`,
-      `Overview: ${s.overview}`,
-    ];
-    if (s.objectives) lines.push(`Objectives: ${s.objectives.join("; ")}`);
+    const parts = [`${s.id} | ${s.name} | ${CATEGORY_LABELS[s.category]} | ${s.tagline}`];
     if (s.eligibility) {
-      lines.push(`${s.eligibilityLabel ?? "Eligibility Criteria"}: ${s.eligibility.join("; ")}`);
+      parts.push(`${s.eligibilityLabel ?? "Eligibility"}: ${s.eligibility.join("; ")}`);
     }
-    if (s.programStructure) lines.push(`Program structure and budget: ${s.programStructure.join("; ")}`);
-    if (s.evaluationSteps) lines.push(`Evaluation steps: ${s.evaluationSteps.join("; ")}`);
-    if (s.evaluationCriteria) {
-      lines.push(
-        `Evaluation weightage: ${s.evaluationCriteria.map((c) => `${c.criterion} (${c.weight} points)`).join(", ")}`
-      );
-    }
-    if (s.benefits) lines.push(`Benefits: ${s.benefits.join("; ")}`);
-    if (s.applicationProcess) lines.push(`Application process: ${s.applicationProcess}`);
-    if (s.deadlineNote) lines.push(`Deadline note: ${s.deadlineNote}`);
-    if (s.documentsRequired) lines.push(`Documents required: ${s.documentsRequired.join("; ")}`);
-    if (s.contact) lines.push(`Contact: ${s.contact}`);
-    if (s.unverifiedNote) lines.push(`Data caveat: ${s.unverifiedNote}`);
-    lines.push(`Official URL: ${s.officialUrl}`);
-    return lines.join("\n");
+    if (s.deadlineNote) parts.push(`Note: ${s.deadlineNote}`);
+    return parts.join("\n");
   }).join("\n\n");
 }
 

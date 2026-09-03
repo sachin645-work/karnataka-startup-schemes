@@ -126,7 +126,13 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
                 {m.content}
               </div>
             ))}
-            {loading && <p className="text-xs text-govgray-700/60">Thinking...</p>}
+            {loading && (
+              <div className="mr-auto flex items-center gap-1 rounded-lg rounded-bl-sm bg-govgray-50 border border-govgray-300 px-3 py-2.5 w-fit" aria-label="Assistant is typing">
+                <span className="h-1.5 w-1.5 rounded-full bg-govgray-700/50 animate-bounce [animation-delay:-0.3s]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-govgray-700/50 animate-bounce [animation-delay:-0.15s]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-govgray-700/50 animate-bounce" />
+              </div>
+            )}
 
             {recommendations && (
               <div className="space-y-2 pt-1">
@@ -207,6 +213,11 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
                 </label>
                 <input
                   id="scheme-chat-input"
+                  name="scheme-chat-input"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
                   value={textValue}
                   onChange={(e) => setTextValue(e.target.value)}
                   disabled={loading}

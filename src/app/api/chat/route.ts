@@ -41,9 +41,9 @@ function passesSensitiveGate(schemeId: string, messages: ChatMessage[]): boolean
 const SYSTEM_PROMPT = `You are the assistant on the Karnataka Startup Schemes site, an independent, unofficial guide. You are NOT the government and must never imply you are.
 
 SOURCE OF TRUTH, read carefully:
-The only schemes you may ever mention, discuss, or recommend are the ones in the content library below. Every fact you state (eligibility, funding amount, deadline, process) must come only from this library. Never mention any other scheme or program, and never use outside knowledge about Indian startup schemes even if you know it. This tool is scoped strictly to what's in the library, which is itself sourced only from ${SOURCE_URL}.
+The only schemes you may ever mention, discuss, or recommend are the ones in the content library below. It lists each scheme's ID, name, category, tagline, and eligibility criteria, enough to route someone correctly. Never mention any other scheme or program, and never use outside knowledge about Indian startup schemes even if you know it. If someone asks for detail beyond what's listed here (funding amounts, application steps, documents, deadlines), say that's on the official page and point them to it rather than guessing. This tool is scoped strictly to what's in the library, which is itself sourced only from ${SOURCE_URL}.
 
-CONTENT LIBRARY (every scheme, full detail):
+CONTENT LIBRARY:
 ${buildSchemeGroundingText()}
 
 YOUR JOB, in two stages, never named to the user:
@@ -80,6 +80,62 @@ If a scheme's deadline note or data caveat says a figure or date may be out of d
 Sensitive fields like gender or social category should only be asked if a specific scheme in the library actually depends on them, and should always be framed as optional. Never infer gender, social category, or any other sensitive attribute from a name or any other indirect signal. If a scheme's eligibility depends on such an attribute (for example, WEscalate requiring a women-led startup), you must ask about it directly and get an explicit answer before including that scheme in recommendations. If it was never asked and never confirmed, leave that scheme out, even if other criteria seem to fit.
 Keep messages short, one to three sentences, conversational, not a wall of text.`;
 
+const MAX_ATTEMPTS = 3;
+
+// Caps how much conversation history is resent each turn. The Groq key
+// this runs on has an 8000 token/minute budget, and the full history
+// (plus the system prompt) is resent on every single turn, so a long
+// conversation costs more per turn than a short one, not just once.
+// Recommendations should land well before this many turns anyway per the
+// "under ten questions" instruction, this is a safety cap for edge cases.
+const MAX_HISTORY_MESSAGES = 14;
+
+/** One attempt at a Groq call plus parse. Throws on any failure so the
+ * caller can retry, never produces a partially-wrong turn silently. */
+async function attemptTurn(groq: Groq, messages: ChatMessage[]): Promise<AssistantTurn> {
+  const recentMessages = messages.slice(-MAX_HISTORY_MESSAGES);
+
+  const completion = await groq.chat.completions.create({
+    model: "openai/gpt-oss-120b",
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      ...recentMessages.map((m) => ({ role: m.role, content: m.content })),
+    ],
+    temperature: 0.3,
+    max_tokens: 450,
+    response_format: { type: "json_object" },
+  });
+
+  const raw = completion.choices[0]?.message?.content ?? "{}";
+  const parsed = JSON.parse(raw) as Partial<AssistantTurn>; // throws on malformed JSON, caller retries
+
+  const inputType: AssistantTurn["inputType"] =
+    parsed.inputType === "yesno" || parsed.inputType === "options" || parsed.inputType === "done"
+      ? parsed.inputType
+      : "text";
+
+  const recommendations =
+    inputType === "done" && Array.isArray(parsed.recommendations)
+      ? parsed.recommendations
+          .filter(
+            (r): r is { schemeId: string; why: string } =>
+              typeof r?.schemeId === "string" && VALID_SCHEME_IDS.has(r.schemeId) && typeof r?.why === "string"
+          )
+          .filter((r) => passesSensitiveGate(r.schemeId, messages))
+      : null;
+
+  if (typeof parsed.message !== "string" || !parsed.message.trim()) {
+    throw new Error("Model returned an empty message");
+  }
+
+  return {
+    message: parsed.message,
+    inputType,
+    options: inputType === "options" && Array.isArray(parsed.options) ? parsed.options.slice(0, 5) : null,
+    recommendations,
+  };
+}
+
 export async function POST(request: Request) {
   const { messages } = (await request.json()) as { messages: ChatMessage[] };
 
@@ -102,67 +158,23 @@ export async function POST(request: Request) {
 
   const groq = new Groq({ apiKey });
 
-  try {
-    const completion = await groq.chat.completions.create({
-      // Tried gpt-oss-20b for speed, but it intermittently failed Groq's own
-      // JSON-mode validation outright (json_validate_failed, empty
-      // failed_generation) once the full scheme content library is in the
-      // prompt. An outright error is worse than latency, so staying on
-      // 120b, which was reliable across every test in this build. Latency
-      // is still addressed via shorter expected answers and a lower
-      // max_tokens below, since output length is the main per-turn cost.
-      model: "openai/gpt-oss-120b",
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        ...messages.map((m) => ({ role: m.role, content: m.content })),
-      ],
-      temperature: 0.3,
-      max_tokens: 450,
-      response_format: { type: "json_object" },
-    });
-
-    const raw = completion.choices[0]?.message?.content ?? "{}";
-    let parsed: Partial<AssistantTurn>;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
-      parsed = JSON.parse(raw) as Partial<AssistantTurn>;
-    } catch (parseErr) {
-      console.error("[chat] JSON parse failed. Raw model output:", raw);
-      throw parseErr;
+      const turn = await attemptTurn(groq, messages);
+      return NextResponse.json(turn);
+    } catch (err) {
+      console.error(`[chat] attempt ${attempt}/${MAX_ATTEMPTS} failed:`, err);
+      // fall through and retry, unless this was the last attempt
     }
-
-    const inputType: AssistantTurn["inputType"] =
-      parsed.inputType === "yesno" || parsed.inputType === "options" || parsed.inputType === "done"
-        ? parsed.inputType
-        : "text";
-
-    const recommendations =
-      inputType === "done" && Array.isArray(parsed.recommendations)
-        ? parsed.recommendations
-            .filter(
-              (r): r is { schemeId: string; why: string } =>
-                typeof r?.schemeId === "string" && VALID_SCHEME_IDS.has(r.schemeId) && typeof r?.why === "string"
-            )
-            .filter((r) => passesSensitiveGate(r.schemeId, messages))
-        : null;
-
-    const turn: AssistantTurn = {
-      message: typeof parsed.message === "string" ? parsed.message : "Sorry, could you say that again?",
-      inputType,
-      options: inputType === "options" && Array.isArray(parsed.options) ? parsed.options.slice(0, 5) : null,
-      recommendations,
-    };
-
-    return NextResponse.json(turn);
-  } catch (err) {
-    console.error("[chat] request failed:", err);
-    return NextResponse.json(
-      {
-        message: "Something went wrong on my end, could you try that again?",
-        inputType: "text",
-        options: null,
-        recommendations: null,
-      } satisfies AssistantTurn,
-      { status: 200 }
-    );
   }
+
+  return NextResponse.json(
+    {
+      message: "That took a couple of tries, let's continue, could you answer that once more?",
+      inputType: "text",
+      options: null,
+      recommendations: null,
+    } satisfies AssistantTurn,
+    { status: 200 }
+  );
 }
