@@ -160,7 +160,7 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
       </button>
 
       {isOpen && (
-        <div className="fixed bottom-24 right-5 z-50 flex h-[560px] w-[380px] max-w-[calc(100vw-2.5rem)] flex-col rounded-lg border border-govgray-300 bg-white shadow-2xl">
+        <div className="fixed bottom-24 right-5 z-50 flex h-[min(560px,calc(100vh-7rem))] w-[380px] max-w-[calc(100vw-2.5rem)] flex-col rounded-lg border border-govgray-300 bg-white shadow-2xl">
           <div className="rounded-t-lg border-b border-govgray-300 bg-govblue-900 px-4 py-3">
             <p className="font-semibold text-white">Scheme Assistant</p>
             <p className="text-xs text-white/70">Find schemes that match your situation.</p>
