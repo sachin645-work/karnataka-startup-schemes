@@ -40,7 +40,7 @@ export async function POST(request: Request) {
             {
               role: "system",
               content:
-                "Write exactly one short, warm, plain sentence, at most 25 words, closing an eligibility chat on an independent Karnataka startup schemes site. No em dashes, no markdown, no quotation marks, just the sentence itself.",
+                "Write exactly one short, warm, plain sentence, at most 25 words, closing an eligibility chat about Karnataka startup schemes. No em dashes, no markdown, no quotation marks, just the sentence itself.",
             },
             { role: "user", content: userContent },
           ],

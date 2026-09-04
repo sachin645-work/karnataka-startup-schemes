@@ -7,10 +7,10 @@ export function SiteFooter() {
     <footer className="bg-govblue-900 text-white mt-auto">
       <div className="mx-auto max-w-6xl px-4 py-10 grid gap-8 sm:grid-cols-3 text-sm">
         <div>
-          <p className="font-semibold mb-2">About this site</p>
+          <p className="font-semibold mb-2">Before You Apply</p>
           <p className="text-white/70">
-            An independent, unofficial guide to Karnataka&apos;s startup schemes. Not affiliated
-            with, endorsed by, or maintained by the Government of Karnataka.
+            Confirm eligibility, deadlines, and funding details on the scheme&apos;s official
+            page before applying.
           </p>
         </div>
         <div>
@@ -28,11 +28,11 @@ export function SiteFooter() {
         <div>
           <p className="font-semibold mb-2">Source</p>
           <p className="text-white/70">
-            Scheme information is based on the official{" "}
+            Scheme details reflect the{" "}
             <a href={SOURCE_URL} target="_blank" rel="noopener noreferrer" className="text-govorange-500 hover:underline">
               Startup Karnataka portal
-            </a>
-            . Always verify there before relying on anything here.
+            </a>{" "}
+            as of the date below.
           </p>
           <p className="mt-2 text-white/50 text-xs">Data last checked: {DATA_LAST_VERIFIED}</p>
         </div>
@@ -42,7 +42,7 @@ export function SiteFooter() {
         <span>Version: preview-1.0</span>
       </div>
       <div className="border-t border-white/10 py-3 text-center text-xs text-white/60">
-        © 2026 Karnataka Startup Schemes, an independent project, unaffiliated with any government body.
+        © 2026 Karnataka Startup Schemes.
       </div>
     </footer>
   );

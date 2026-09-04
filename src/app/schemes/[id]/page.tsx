@@ -152,12 +152,11 @@ export default async function SchemeDetailPage({ params }: { params: Promise<{ i
         )}
 
         <p className="text-xs text-govgray-700/60 border-t border-govgray-300 pt-4">
-          This is an independent, unofficial summary. Always verify current eligibility, deadlines,
-          and figures on the{" "}
+          Always confirm current eligibility, deadlines, and figures on the{" "}
           <a href={scheme.officialUrl} target="_blank" rel="noopener noreferrer" className="text-govblue-700 hover:underline">
-            official page
+            scheme&apos;s official page
           </a>{" "}
-          before relying on it. This tool never accepts or processes applications.
+          before applying. This page does not accept or process applications.
         </p>
       </div>
     </main>

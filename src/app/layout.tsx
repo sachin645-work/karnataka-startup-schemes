@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Karnataka Startup Schemes",
   description:
-    "An independent, unofficial guide to Karnataka's startup schemes and programs, browse schemes, check eligibility, and go straight to the official application page.",
+    "Explore Karnataka's startup schemes and programs, funding, incubation, and market-access initiatives, check your eligibility, and go straight to the application page.",
 };
 
 export const viewport: Viewport = {
