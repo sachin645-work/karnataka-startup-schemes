@@ -31,6 +31,8 @@ export type Scheme = {
   benefits?: string[];
   applicationProcess?: string;
   deadlineNote?: string;
+  /** ISO datetime, only set when a real, currently-open deadline is confirmed on the official page. Never fabricated. */
+  deadlineDate?: string;
   documentsRequired?: string[];
   downloads?: string[];
   contact?: string;
@@ -116,7 +118,8 @@ export const SCHEMES: Scheme[] = [
     documentsRequired: ["Pitch deck", "Proof of degree", "Proof of Karnataka domicile and citizenship"],
     downloads: ["Operational guidelines", "Pitch deck template"],
     applicationProcess: "Apply through the official portal's application form ahead of the stated deadline.",
-    deadlineNote: "Site has listed 31 Aug 2026 as a past application round's deadline, check the official page for the current round.",
+    deadlineNote: "Current round closes 15 Sep 2026, 5:00 PM, confirm on the official page as this can move.",
+    deadlineDate: "2026-09-15T17:00:00+05:30",
     contact:
       "Karnataka Startup Cell, Karnataka Innovation and Technology Society (KITS), Dept. of Electronics, IT & BT, Government of Karnataka, Bengaluru. Phone: 080-22231007.",
   },

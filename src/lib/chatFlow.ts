@@ -196,7 +196,22 @@ export function getNextQuestion(state: ChatState): Question | null {
   return null;
 }
 
-export type Recommendation = { schemeId: string; why: string };
+export type RecommendationTier = "strong-fit" | "general";
+export type Recommendation = { schemeId: string; why: string; tier: RecommendationTier };
+
+/** Past Grand Challenges rounds have leaned toward these kinds of public problems per sector, stated as
+ *  illustrative history only, never as the current open categories, which rotate round to round. */
+const SECTOR_CHALLENGE_HINT: Record<string, string> = {
+  Biotech: "primary healthcare delivery and undernutrition",
+  AgriTech: "agricultural pest diagnostics and food security",
+  "MedTech / Healthtech": "primary healthcare delivery",
+  Cleantech: "water conservation and environmental quality",
+};
+
+const STAGE_LABEL: Record<string, string> = {
+  "Early stage, not generating revenue yet": "early-stage",
+  "Growth stage, scaling up": "growth-stage",
+};
 
 /** Deterministic eligibility matching, no model judgment involved. */
 export function computeRecommendations(state: ChatState): Recommendation[] {
@@ -210,6 +225,7 @@ export function computeRecommendations(state: ChatState): Recommendation[] {
     ) {
       recs.push({
         schemeId: "grassroot-innovation",
+        tier: "strong-fit",
         why: "You're a Karnataka-based citizen innovator whose work hasn't already received government funding or been folded into an existing government program, which is exactly who this grant supports.",
       });
     }
@@ -221,10 +237,12 @@ export function computeRecommendations(state: ChatState): Recommendation[] {
       if (state.collegeLocation === ELSEWHERE) {
         recs.push({
           schemeId: "nain-2.0",
+          tier: "strong-fit",
           why: "Your college is outside Bengaluru Urban district, which is exactly where NAIN 2.0 sets up its funded innovation centres.",
         });
         recs.push({
           schemeId: "leap",
+          tier: "strong-fit",
           why: "LEAP funds student innovation in specific district clusters outside Bengaluru, likely including yours, confirm your exact district is on the current list on the official page.",
         });
       }
@@ -244,6 +262,7 @@ export function computeRecommendations(state: ChatState): Recommendation[] {
     if (rgepEligible) {
       recs.push({
         schemeId: "rgep",
+        tier: "strong-fit",
         why: "You're a Karnataka-domiciled Science or Engineering graduate, 30 or under, not employed, without a stake in another startup, and your idea hasn't gone to market yet, which matches RGEP's stated criteria closely.",
       });
     }
@@ -254,47 +273,65 @@ export function computeRecommendations(state: ChatState): Recommendation[] {
     if (state.registered !== "Yes") {
       recs.push({
         schemeId: "incubation-hub",
+        tier: "strong-fit",
         why: "Most other programs need a registered startup first, this directory can help you find an incubator to get there.",
       });
       return recs;
     }
 
+    const stageWord = STAGE_LABEL[state.stage ?? ""] ?? "growing";
+    const sectorHint = SECTOR_CHALLENGE_HINT[state.sector ?? ""];
+    const hasSector = Boolean(state.sector) && state.sector !== "Something else";
+    const sectorArticle = hasSector && /^[aeiou]/i.test(state.sector ?? "") ? "an" : "a";
+    const teamClause = hasSector ? `${sectorArticle} ${state.sector} team` : "a team";
+
     recs.push({
       schemeId: "elevate",
-      why: "ELEVATE is Karnataka's main recurring grant-in-aid program for registered startups, check the current edition's own eligibility and funding cap.",
+      tier: "general",
+      why: `ELEVATE is Karnataka's main recurring grant-in-aid program for registered startups; as ${teamClause} currently ${stageWord}, check the current edition's own eligibility and funding cap before applying.`,
     });
     recs.push({
       schemeId: "grand-challenges",
-      why: "Open to any startup with a real technology solution to a public problem, worth a look regardless of stage.",
+      tier: "general",
+      why: sectorHint
+        ? `Open to any startup with a real technology solution to a public problem, worth a look regardless of stage. Past rounds have leaned toward challenges close to ${sectorHint}, confirm the current categories on the official page since they rotate.`
+        : "Open to any startup with a real technology solution to a public problem, worth a look regardless of stage.",
     });
     recs.push({
       schemeId: "booster-kit",
-      why: "A directory of discounted services, legal, IP, incorporation, and tools, open to registered startups like yours.",
+      tier: "general",
+      why: `A directory of discounted services, legal, IP, incorporation, and tools, especially useful while you're ${stageWord}.`,
     });
     recs.push({
       schemeId: "incubation-hub",
+      tier: "general",
       why: "A directory of Karnataka's incubators and Centres of Excellence if you're looking for a home base or mentorship.",
     });
     recs.push({
       schemeId: "incentives-2025-30",
-      why: "If you meet the state's official Startup definition and are registered with KITS, you can likely claim these fiscal incentives.",
+      tier: "general",
+      why: "If you meet the state's official Startup definition and are registered with KITS, you can likely claim these fiscal incentives, regardless of sector or stage.",
     });
     recs.push({
       schemeId: "kitven",
-      why: "Karnataka's own state-backed VC fund, worth pitching directly alongside anything else here.",
+      tier: "general",
+      why: "Karnataka's own state-backed VC fund; being open across sectors and stages, it's worth pitching directly alongside anything else here.",
     });
     recs.push({
       schemeId: "letsventure",
-      why: "Gives registered Karnataka startups access to LetsVenture's investor and mentorship network.",
+      tier: "general",
+      why: "Gives registered Karnataka startups access to LetsVenture's investor and mentorship network, open across sectors and stages including yours.",
     });
     recs.push({
       schemeId: "propel",
-      why: "A general startup enablement and acceleration platform open to registered startups.",
+      tier: "general",
+      why: `A general startup enablement and acceleration platform open to registered startups, including ${stageWord} teams like yours.`,
     });
 
     if (WESCALATE_SECTORS.includes(state.sector ?? "") && state.womenLed === "Yes") {
       recs.push({
         schemeId: "wescalate",
+        tier: "strong-fit",
         why: "You said your startup is women-led and in one of WEscalate's supported sectors, which is exactly what this program is built for.",
       });
     }
@@ -302,14 +339,17 @@ export function computeRecommendations(state: ChatState): Recommendation[] {
     if (state.location === ELSEWHERE) {
       recs.push({
         schemeId: "leap",
+        tier: "strong-fit",
         why: "LEAP funds ventures in specific clusters outside Bengaluru, likely including yours, confirm your exact district is on the current list.",
       });
       recs.push({
         schemeId: "beyond-bengaluru-seed-fund",
+        tier: "strong-fit",
         why: "This seed fund specifically targets early-stage tech startups outside Bengaluru Urban district, like yours.",
       });
       recs.push({
         schemeId: "fund-of-funds",
+        tier: "strong-fit",
         why: "Beyond-Bengaluru startups get priority here, worth exploring especially if your work has a longer research or R&D timeline.",
       });
     }
@@ -317,6 +357,7 @@ export function computeRecommendations(state: ChatState): Recommendation[] {
     if (state.eProcurement === "Yes") {
       recs.push({
         schemeId: "preferential-market-access",
+        tier: "strong-fit",
         why: "You're registered with Startup Karnataka and on the e-Procurement portal, the two prerequisites PMA asks for.",
       });
     }

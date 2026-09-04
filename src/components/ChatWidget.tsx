@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import Link from "next/link";
 import { getSchemeById } from "@/lib/schemes";
 import { getNextQuestion, computeRecommendations, type ChatState, type Question, type Recommendation } from "@/lib/chatFlow";
 import { track } from "@/lib/mixpanel";
@@ -125,6 +126,20 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
     handleAnswer(textValue);
   }
 
+  function restart() {
+    track("chatbot_restarted");
+    startedRef.current = true;
+    setStarted(false);
+    setName("");
+    setAnswers({});
+    setCurrentQuestionId(null);
+    setRecommendations(null);
+    setTextValue("");
+    setMessages([{ role: "assistant", content: OPENING_MESSAGE }]);
+    setInputType("text");
+    setOptions(null);
+  }
+
   return (
     <>
       <button
@@ -173,38 +188,30 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
             )}
 
             {recommendations && (
-              <div className="space-y-2 pt-1">
+              <div className="space-y-3 pt-1">
                 {recommendations.length === 0 && (
                   <p className="text-sm text-govgray-700/70">
                     Nothing here looks like a fit right now based on what you have shared.
                   </p>
                 )}
-                {recommendations.map((rec) => {
-                  const scheme = getSchemeById(rec.schemeId);
-                  if (!scheme) return null;
-                  return (
-                    <a
-                      key={rec.schemeId}
-                      href={scheme.officialUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => track("scheme_link_clicked", { scheme: scheme.id })}
-                      className="block rounded-lg border border-govgray-300 bg-white p-3 hover:border-govblue-900 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-900 transition-all"
-                    >
-                      <p className="font-medium text-govblue-900 text-sm">{scheme.name}</p>
-                      <p className="mt-1 text-xs text-govgray-700/70">{rec.why}</p>
-                      <span className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-govorange-600">
-                        Visit official page
-                        <svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M7 17L17 7M17 7H8M17 7V16" />
-                        </svg>
-                      </span>
-                    </a>
-                  );
-                })}
-                <p className="pt-1 text-[11px] text-govgray-700/60">
-                  Always verify eligibility and current status on the official page before relying on it.
-                </p>
+                {(() => {
+                  const strongFit = recommendations.filter((r) => r.tier === "strong-fit");
+                  const general = recommendations.filter((r) => r.tier === "general");
+                  if (strongFit.length > 0 && general.length > 0) {
+                    return (
+                      <>
+                        <RecommendationGroup title="Best fit for you" recs={strongFit} />
+                        <RecommendationGroup title="Also worth checking" recs={general} />
+                      </>
+                    );
+                  }
+                  return recommendations.length > 0 ? <RecommendationGroup recs={recommendations} /> : null;
+                })()}
+                {recommendations.length > 0 && (
+                  <p className="pt-1 text-[11px] text-govgray-700/60">
+                    Always verify eligibility and current status on the official page before relying on it.
+                  </p>
+                )}
               </div>
             )}
           </div>
@@ -244,7 +251,7 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
               </div>
             )}
 
-            {(inputType === "text" || inputType === "done") && (
+            {inputType === "text" && (
               <form onSubmit={handleTextSubmit} className="flex gap-2">
                 <label htmlFor="scheme-chat-input" className="sr-only">
                   Type a message
@@ -258,18 +265,37 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
                   spellCheck={false}
                   value={textValue}
                   onChange={(e) => setTextValue(e.target.value)}
-                  disabled={loading || inputType === "done"}
+                  disabled={loading}
                   placeholder={started ? "Type your answer..." : "Say hello to get started..."}
                   className="flex-1 rounded border border-govgray-300 bg-white px-3 py-2 text-sm text-govgray-700 placeholder:text-govgray-700/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-900 disabled:opacity-50"
                 />
                 <button
                   type="submit"
-                  disabled={loading || inputType === "done"}
+                  disabled={loading}
                   className="rounded bg-govorange-500 px-3 py-2 text-sm font-medium text-white hover:bg-govorange-600 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-900"
                 >
                   Send
                 </button>
               </form>
+            )}
+
+            {inputType === "done" && !loading && (
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={restart}
+                  className="flex-1 rounded border border-govgray-300 py-2 text-sm text-govgray-700 hover:bg-govgray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-900"
+                >
+                  Start Over
+                </button>
+                <Link
+                  href="/schemes"
+                  onClick={() => track("view_all_schemes_from_chat")}
+                  className="flex-1 rounded bg-govorange-500 py-2 text-center text-sm font-medium text-white hover:bg-govorange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-900"
+                >
+                  View All Schemes
+                </Link>
+              </div>
             )}
           </div>
         </div>
@@ -277,3 +303,34 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
     </>
   );
 });
+
+function RecommendationGroup({ title, recs }: { title?: string; recs: Recommendation[] }) {
+  return (
+    <div className="space-y-2">
+      {title && <p className="text-xs font-semibold uppercase tracking-wide text-govgray-700/70">{title}</p>}
+      {recs.map((rec) => {
+        const scheme = getSchemeById(rec.schemeId);
+        if (!scheme) return null;
+        return (
+          <a
+            key={rec.schemeId}
+            href={scheme.officialUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => track("scheme_link_clicked", { scheme: scheme.id })}
+            className="block rounded-lg border border-govgray-300 bg-white p-3 hover:border-govblue-900 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-900 transition-all"
+          >
+            <p className="font-medium text-govblue-900 text-sm">{scheme.name}</p>
+            <p className="mt-1 text-xs text-govgray-700/70">{rec.why}</p>
+            <span className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-govorange-600">
+              Visit official page
+              <svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M7 17L17 7M17 7H8M17 7V16" />
+              </svg>
+            </span>
+          </a>
+        );
+      })}
+    </div>
+  );
+}
