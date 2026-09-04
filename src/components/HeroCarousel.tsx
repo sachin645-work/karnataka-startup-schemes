@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getSchemeById } from "@/lib/schemes";
+
+const AUTO_ADVANCE_MS = 3000;
 
 type Slide = {
   schemeId: string;
@@ -74,6 +76,16 @@ export function HeroCarousel() {
     setIndex((i) => (i + delta + SLIDES.length) % SLIDES.length);
   }
 
+  // Auto-advances every AUTO_ADVANCE_MS; restarts from whichever slide is current,
+  // so a manual click (which also changes `index`) resets the countdown instead of
+  // fighting it.
+  useEffect(() => {
+    const id = setTimeout(() => {
+      setIndex((i) => (i + 1) % SLIDES.length);
+    }, AUTO_ADVANCE_MS);
+    return () => clearTimeout(id);
+  }, [index]);
+
   return (
     <section className="bg-white">
       <div className="mx-auto max-w-6xl px-4 py-12 grid gap-8 md:grid-cols-2 items-center">
@@ -81,7 +93,7 @@ export function HeroCarousel() {
         <div>
           <p className="text-govorange-500 font-bold text-sm">{slide.eyebrow}</p>
           <h1 className="mt-2 text-3xl md:text-4xl font-extrabold leading-tight text-govblue-900">
-            Find the Karnataka startup scheme that&apos;s actually built for you
+            {scheme?.name ?? slide.posterTitle}
           </h1>
           <p className="mt-4 text-govgray-700">{slide.description}</p>
           {daysLeft !== null && (

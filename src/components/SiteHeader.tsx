@@ -33,7 +33,7 @@ export function SiteHeader() {
           </span>
           <div>
             <p className="font-extrabold text-govblue-900 text-lg leading-tight tracking-tight">
-              KARNATAKA STARTUP SCHEMES
+              KARNATAKA STARTUP
             </p>
             <p className="text-xs text-govgray-700/70 leading-tight">
               Startup Ecosystem Portal
