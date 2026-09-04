@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import Link from "next/link";
 import { getSchemeById } from "@/lib/schemes";
 import { getNextQuestion, computeRecommendations, type ChatState, type Question, type Recommendation } from "@/lib/chatFlow";
@@ -12,10 +12,12 @@ type InputType = "text" | "yesno" | "options" | "done";
 export type ChatWidgetHandle = { open: () => void };
 
 const OPENING_MESSAGE =
-  "Hi! I can help you find Karnataka startup schemes you might be eligible for. What's your name?";
+  "Hi! I can help you find Karnataka startup schemes you might be eligible for. Say hi to start the conversation.";
+const NAME_PROMPT = "What's your name?";
 
 export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_props, ref) {
   const [isOpen, setIsOpen] = useState(false);
+  const [greeted, setGreeted] = useState(false);
   const [started, setStarted] = useState(false);
   const startedRef = useRef(false);
   const [name, setName] = useState("");
@@ -26,7 +28,13 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
   const [options, setOptions] = useState<string[] | null>(null);
   const [recommendations, setRecommendations] = useState<Recommendation[] | null>(null);
   const [textValue, setTextValue] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
+  const messagesRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = messagesRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [messages, recommendations]);
 
   function openChat() {
     setIsOpen(true);
@@ -55,41 +63,17 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
     setOptions(question.options ?? null);
   }
 
-  async function finish(finalAnswers: ChatState, finalName: string) {
+  function finish(finalAnswers: ChatState, finalName: string) {
     const recs = computeRecommendations(finalAnswers);
     track("recommendations_shown", { count: recs.length });
     setRecommendations(recs);
     setInputType("done");
 
-    const fallback =
+    const closing =
       recs.length > 0
-        ? `Nice work, ${finalName}, here's what's worth applying for.`
+        ? "I hope you find these Karnataka startup schemes helpful for your journey."
         : `Thanks for walking through this, ${finalName}. Nothing here looks like a fit right now, but that can change fast as things move.`;
-    setMessages((m) => [...m, { role: "assistant", content: fallback }]);
-
-    // Best-effort only: swaps in a warmer closing line if Groq responds
-    // quickly, otherwise the fallback above already said everything that
-    // matters. Never blocks or shows an error either way.
-    setLoading(true);
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: finalName,
-          schemeNames: recs.map((r) => getSchemeById(r.schemeId)?.name).filter(Boolean),
-        }),
-        signal: AbortSignal.timeout(7000),
-      });
-      const data = await res.json();
-      if (data.message) {
-        setMessages((m) => [...m.slice(0, -1), { role: "assistant", content: data.message }]);
-      }
-    } catch {
-      // keep the fallback message
-    } finally {
-      setLoading(false);
-    }
+    setMessages((m) => [...m, { role: "assistant", content: closing }]);
   }
 
   function handleAnswer(rawValue: string) {
@@ -99,6 +83,14 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
     setMessages((m) => [...m, { role: "user", content: trimmed }]);
     setTextValue("");
     setOptions(null);
+
+    if (!greeted) {
+      setGreeted(true);
+      track("chatbot_greeted");
+      setMessages((m) => [...m, { role: "assistant", content: NAME_PROMPT }]);
+      setInputType("text");
+      return;
+    }
 
     if (!started) {
       setStarted(true);
@@ -129,6 +121,7 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
   function restart() {
     track("chatbot_restarted");
     startedRef.current = true;
+    setGreeted(false);
     setStarted(false);
     setName("");
     setAnswers({});
@@ -173,7 +166,7 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
             <p className="text-xs text-white/70">Find schemes that match your situation.</p>
           </div>
 
-          <div aria-live="polite" className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
+          <div ref={messagesRef} aria-live="polite" className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
             {messages.map((m, i) => (
               <div
                 key={i}
@@ -273,7 +266,7 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
                   value={textValue}
                   onChange={(e) => setTextValue(e.target.value)}
                   disabled={loading}
-                  placeholder={started ? "Type your answer..." : "Say hello to get started..."}
+                  placeholder={greeted ? "Type your answer..." : "Say hello to get started..."}
                   className="flex-1 rounded border border-govgray-300 bg-white px-3 py-2 text-sm text-govgray-700 placeholder:text-govgray-700/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-900 disabled:opacity-50"
                 />
                 <button
