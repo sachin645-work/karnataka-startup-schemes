@@ -28,9 +28,6 @@ export function SiteHeader() {
       {/* Masthead, text-based wordmark in place of the logo mark */}
       <div className="border-b border-govgray-300 bg-white">
         <div className="mx-auto max-w-6xl px-4 py-4 flex items-center gap-2">
-          <span className="text-govorange-500 text-2xl font-black leading-none" aria-hidden="true">
-            ➤
-          </span>
           <div>
             <p className="font-extrabold text-govblue-900 text-lg leading-tight tracking-tight">
               KARNATAKA STARTUP

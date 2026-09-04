@@ -153,8 +153,15 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
             <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
           </svg>
         ) : (
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-            <path d="M21 12c0 4.418-4.03 8-9 8-1.09 0-2.13-.17-3.09-.49L3 21l1.6-4.28C3.6 15.34 3 13.73 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8Z" strokeLinejoin="round" />
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
+            <line x1="12" y1="1.5" x2="12" y2="4" strokeLinecap="round" />
+            <circle cx="12" cy="1.15" r="0.9" fill="currentColor" stroke="none" />
+            <path
+              d="M4 7.5C4 6.12 5.12 5 6.5 5h11C18.88 5 20 6.12 20 7.5v7c0 1.38-1.12 2.5-2.5 2.5H9l-3.5 3v-3H6.5C5.12 17 4 15.88 4 14.5v-7Z"
+              strokeLinejoin="round"
+            />
+            <circle cx="9.3" cy="10.75" r="1.15" fill="currentColor" stroke="none" />
+            <circle cx="14.7" cy="10.75" r="1.15" fill="currentColor" stroke="none" />
           </svg>
         )}
       </button>
