@@ -4,7 +4,8 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "re
 import Link from "next/link";
 import { getSchemeById } from "@/lib/schemes";
 import { getNextQuestion, computeRecommendations, type ChatState, type Question, type Recommendation } from "@/lib/chatFlow";
-import { track } from "@/lib/mixpanel";
+import { track, registerFounderName } from "@/lib/mixpanel";
+import { logSession, isInternal } from "@/lib/supabase";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 type InputType = "text" | "yesno" | "options" | "done";
@@ -66,6 +67,15 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
   function finish(finalAnswers: ChatState, finalName: string) {
     const recs = computeRecommendations(finalAnswers);
     track("recommendations_shown", { count: recs.length });
+    void logSession({
+      name: finalName || null,
+      persona: finalAnswers.persona ?? null,
+      answers: finalAnswers,
+      recommendations: recs.map((r) => ({ schemeId: r.schemeId, tier: r.tier })),
+      result_count: recs.length,
+      was_empty: recs.length === 0,
+      internal: isInternal(),
+    });
     setRecommendations(recs);
     setInputType("done");
 
@@ -95,6 +105,7 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
     if (!started) {
       setStarted(true);
       setName(trimmed);
+      registerFounderName(trimmed);
       track("message_sent", { question: "name" });
       const first = getNextQuestion({});
       if (first) askQuestion(first);

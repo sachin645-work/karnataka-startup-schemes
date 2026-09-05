@@ -4,6 +4,7 @@ import "./globals.css";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ChatWidget } from "@/components/ChatWidget";
+import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <div className="flex-1 flex flex-col">{children}</div>
         <SiteFooter />
         <ChatWidget />
+        <AnalyticsTracker />
       </body>
     </html>
   );
