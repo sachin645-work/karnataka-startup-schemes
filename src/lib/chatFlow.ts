@@ -213,8 +213,47 @@ const STAGE_LABEL: Record<string, string> = {
   "Growth stage, scaling up": "growth-stage",
 };
 
+/**
+ * Honest safety net so the assistant never ends on a blank dead-end for
+ * someone the tool is actually for (PRD: "fail safe, no dead ends"). These
+ * are framed as open starting points to explore, never as eligibility
+ * matches, so the "no false you-are-eligible" guardrail still holds.
+ */
+function generalStartingPoints(): Recommendation[] {
+  return [
+    {
+      schemeId: "incubation-hub",
+      tier: "general",
+      why: "Not matched to your answers, but this directory of Karnataka incubators, TBIs, and Centres of Excellence is open to anyone looking for a place to build or a mentor to call.",
+    },
+    {
+      schemeId: "grand-challenges",
+      tier: "general",
+      why: "Not gated to your answers either, but it is open to any startup with a real technology solution to a public problem, worth exploring as your idea takes shape. Confirm the current open categories on the official page.",
+    },
+  ];
+}
+
+/**
+ * A hard exclude is someone the Karnataka scheme set genuinely does not
+ * serve, not an Indian citizen domiciled in Karnataka. For them an empty
+ * result is the honest answer, so the safety net deliberately stays off.
+ */
+function isHardExcluded(state: ChatState): boolean {
+  return state.grassrootsCitizen === "No" || state.gradCitizen === "No";
+}
+
 /** Deterministic eligibility matching, no model judgment involved. */
 export function computeRecommendations(state: ChatState): Recommendation[] {
+  const recs = computeGatedRecommendations(state);
+  if (recs.length === 0 && !isHardExcluded(state)) {
+    return generalStartingPoints();
+  }
+  return recs;
+}
+
+/** The strict, gated matching. Returns only schemes whose actual criteria the answers satisfy. */
+function computeGatedRecommendations(state: ChatState): Recommendation[] {
   const recs: Recommendation[] = [];
 
   if (state.persona === PERSONA_GRASSROOTS) {
