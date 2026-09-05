@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { SOURCE_URL, DATA_LAST_VERIFIED } from "@/lib/schemes";
 
 export function SiteFooter() {
@@ -16,7 +17,12 @@ export function SiteFooter() {
         <div>
           <p className="font-semibold mb-2">Preview pages</p>
           <ul className="space-y-1 text-white/70">
-            {["Copyright Policy", "Terms & Conditions", "Privacy Policy", "Sitemap"].map((p) => (
+            <li>
+              <Link href="/privacy" className="hover:underline">
+                Privacy Policy
+              </Link>
+            </li>
+            {["Copyright Policy", "Terms & Conditions", "Sitemap"].map((p) => (
               <li key={p}>
                 <a href="#" onClick={(e) => e.preventDefault()} title="Preview only" className="hover:underline">
                   {p}
