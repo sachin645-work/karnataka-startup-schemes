@@ -330,7 +330,10 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
                 </button>
                 <Link
                   href="/schemes"
-                  onClick={() => track("view_all_schemes_from_chat")}
+                  onClick={() => {
+                    track("view_all_schemes_from_chat");
+                    setIsOpen(false);
+                  }}
                   className="flex-1 rounded bg-govorange-500 py-2 text-center text-sm font-medium text-white hover:bg-govorange-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-900"
                 >
                   View All Schemes
