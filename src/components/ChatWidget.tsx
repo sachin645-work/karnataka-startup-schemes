@@ -31,10 +31,20 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
   const [textValue, setTextValue] = useState("");
   const [loading] = useState(false);
   const messagesRef = useRef<HTMLDivElement>(null);
+  const recsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const el = messagesRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
+    if (!el) return;
+    if (recommendations && recsRef.current) {
+      // When results appear, land at the START of them (with the closing line
+      // peeking above) so the founder reads top-to-bottom and scrolls down to
+      // the end, instead of jumping straight to the last row.
+      const delta = recsRef.current.getBoundingClientRect().top - el.getBoundingClientRect().top;
+      el.scrollTop = Math.max(0, el.scrollTop + delta - 56);
+    } else {
+      el.scrollTop = el.scrollHeight;
+    }
   }, [messages, recommendations]);
 
   function openChat() {
@@ -194,7 +204,7 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
             )}
 
             {recommendations && (
-              <div className="space-y-2 pt-1">
+              <div ref={recsRef} className="space-y-2 pt-1">
                 {recommendations.length === 0 && (
                   <p className="text-sm text-govgray-700/70">
                     Nothing here looks like a fit right now based on what you have shared.
