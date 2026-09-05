@@ -49,14 +49,6 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
 
   useImperativeHandle(ref, () => ({ open: openChat }));
 
-  function toggle() {
-    if (isOpen) {
-      setIsOpen(false);
-    } else {
-      openChat();
-    }
-  }
-
   function askQuestion(question: Question) {
     setCurrentQuestionId(question.id);
     setMessages((m) => [...m, { role: "assistant", content: question.prompt }]);
@@ -146,17 +138,13 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
 
   return (
     <>
-      <button
-        type="button"
-        onClick={toggle}
-        aria-label={isOpen ? "Close chat" : "Open chat"}
-        className="fixed bottom-5 right-5 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-govorange-500 text-white shadow-lg hover:bg-govorange-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-900 focus-visible:ring-offset-2"
-      >
-        {isOpen ? (
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
-            <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
-          </svg>
-        ) : (
+      {!isOpen && (
+        <button
+          type="button"
+          onClick={openChat}
+          aria-label="Open chat"
+          className="fixed bottom-5 right-5 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-govorange-500 text-white shadow-lg hover:bg-govorange-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-900 focus-visible:ring-offset-2"
+        >
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
             <line x1="12" y1="1.5" x2="12" y2="4" strokeLinecap="round" />
             <circle cx="12" cy="1.15" r="0.9" fill="currentColor" stroke="none" />
@@ -167,12 +155,24 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
             <circle cx="9.3" cy="10.75" r="1.15" fill="currentColor" stroke="none" />
             <circle cx="14.7" cy="10.75" r="1.15" fill="currentColor" stroke="none" />
           </svg>
-        )}
-      </button>
+        </button>
+      )}
 
       {isOpen && (
-        <div className="fixed bottom-24 right-5 z-50 flex h-[min(560px,calc(100vh-7rem))] w-[380px] max-w-[calc(100vw-2.5rem)] flex-col rounded-lg border border-govgray-300 bg-white shadow-2xl">
-          <div ref={messagesRef} aria-live="polite" className="flex-1 space-y-3 overflow-y-auto rounded-t-lg px-4 py-3">
+        <div className="fixed bottom-5 right-5 z-50 flex h-[min(680px,calc(100vh-3rem))] w-[560px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-lg border border-govgray-300 bg-white shadow-2xl">
+          <div className="flex items-center justify-end border-b border-govgray-200 px-2 py-1.5">
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              aria-label="Close chat"
+              className="flex h-7 w-7 items-center justify-center rounded-full text-govgray-700/60 hover:bg-govgray-100 hover:text-govgray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-900"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" aria-hidden="true">
+                <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>
+          <div ref={messagesRef} aria-live="polite" className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
             {messages.map((m, i) => (
               <div
                 key={i}
@@ -194,29 +194,53 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
             )}
 
             {recommendations && (
-              <div className="space-y-3 pt-1">
+              <div className="space-y-2 pt-1">
                 {recommendations.length === 0 && (
                   <p className="text-sm text-govgray-700/70">
                     Nothing here looks like a fit right now based on what you have shared.
                   </p>
                 )}
-                {(() => {
-                  const strongFit = recommendations.filter((r) => r.tier === "strong-fit");
-                  const general = recommendations.filter((r) => r.tier === "general");
-                  if (strongFit.length > 0 && general.length > 0) {
-                    return (
-                      <>
-                        <RecommendationGroup title="Best fit for you" recs={strongFit} />
-                        <RecommendationGroup title="Also worth checking" recs={general} />
-                      </>
-                    );
-                  }
-                  return recommendations.length > 0 ? <RecommendationGroup recs={recommendations} /> : null;
-                })()}
                 {recommendations.length > 0 && (
-                  <p className="pt-1 text-[11px] text-govgray-700/60">
-                    Always verify eligibility and current status on the official page before relying on it.
-                  </p>
+                  <>
+                    <div className="overflow-hidden rounded-lg border border-govgray-300">
+                      <table className="w-full border-collapse text-sm">
+                        <thead>
+                          <tr className="bg-govgray-50 text-left text-xs font-semibold uppercase tracking-wide text-govgray-700/70">
+                            <th className="border-b border-govgray-300 px-3 py-2">Scheme</th>
+                            <th className="border-b border-govgray-300 px-3 py-2">Description</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {[
+                            ...recommendations.filter((r) => r.tier === "strong-fit"),
+                            ...recommendations.filter((r) => r.tier === "general"),
+                          ].map((rec) => {
+                            const scheme = getSchemeById(rec.schemeId);
+                            if (!scheme) return null;
+                            return (
+                              <tr key={rec.schemeId} className="border-b border-govgray-200 align-top last:border-0">
+                                <td className="px-3 py-2">
+                                  <a
+                                    href={scheme.officialUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={() => track("scheme_link_clicked", { scheme: scheme.id })}
+                                    className="font-medium text-govblue-900 hover:text-govorange-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-900"
+                                  >
+                                    {scheme.name}
+                                  </a>
+                                </td>
+                                <td className="px-3 py-2 text-govgray-700/80">{scheme.tagline}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                    <p className="pt-1 text-[11px] text-govgray-700/60">
+                      Always verify eligibility and current status on the official page before relying on it.
+                    </p>
+                  </>
                 )}
               </div>
             )}
@@ -309,34 +333,3 @@ export const ChatWidget = forwardRef<ChatWidgetHandle>(function ChatWidget(_prop
     </>
   );
 });
-
-function RecommendationGroup({ title, recs }: { title?: string; recs: Recommendation[] }) {
-  return (
-    <div className="space-y-2">
-      {title && <p className="text-xs font-semibold uppercase tracking-wide text-govgray-700/70">{title}</p>}
-      {recs.map((rec) => {
-        const scheme = getSchemeById(rec.schemeId);
-        if (!scheme) return null;
-        return (
-          <a
-            key={rec.schemeId}
-            href={scheme.officialUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => track("scheme_link_clicked", { scheme: scheme.id })}
-            className="block rounded-lg border border-govgray-300 bg-white p-3 hover:border-govblue-900 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-govblue-900 transition-all"
-          >
-            <p className="font-medium text-govblue-900 text-sm">{scheme.name}</p>
-            <p className="mt-1 text-xs text-govgray-700/70">{rec.why}</p>
-            <span className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-govorange-600">
-              Visit official page
-              <svg aria-hidden="true" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M7 17L17 7M17 7H8M17 7V16" />
-              </svg>
-            </span>
-          </a>
-        );
-      })}
-    </div>
-  );
-}
